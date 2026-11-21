@@ -196,9 +196,9 @@ def draw_wrapped(board, x, y, lines, lh, label, maxw):
 def masthead(b):
     counts = S.region_counts()
 
-    # Signature Midnight Slate-Indigo prestige folio bar
+    # Signature Midnight Slate-Indigo prestige folio bar (20:30 UTC edition clock)
     b.rect(M, 8, W - M, 25, fill=FOLIO_BG)
-    bl = b.text(M + 8, 16.7, "GLOBAL DISPATCH · EDITION 21 NOV", "sans_k", 8.6, FOLIO_GOLD,
+    bl = b.text(M + 8, 16.7, "GLOBAL DISPATCH · 21 NOV · 20:30 UTC", "sans_k", 8.6, FOLIO_GOLD,
                 anchor="lm", spacing=1.0, label="kicker")
     stats = (f"{len(S.STORIES)} VERIFIED STORIES · {len(counts)} REGIONS · "
              f"EVERY ONE DATED {S.DAY_LABEL.upper()}")

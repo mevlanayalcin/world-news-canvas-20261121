@@ -92,13 +92,13 @@ STORIES = [
          sources="CAAP, AP"),
     dict(id=10, region="GLOBAL", beat="Space", tag="OFFICIAL", utc="2026-11-21T19:01",
          place="ESA DARMSTADT", lat=49.9, lon=8.6,
-         banner="MERCURY: ORBIT", sub="ESA · JAXA", chip="Confirmed · 8-yr trip",
+         banner="MERCURY: ORBIT", sub="ESA · JAXA", chip="Confirmed · 19:01Z",
          headline="BepiColombo enters orbit around Mercury",
          summary="MPO and Mio enter Mercury orbit after 8-year trip; split Dec 9–10.",
          sources="ESA, JAXA, Forbes"),
     dict(id=11, region="GLOBAL", beat="Markets", tag="CONFIRMED", utc="2026-11-21T02:08",
          place="GLOBAL MARKETS", lat=32.0, lon=-40.0,
-         banner="BITCOIN: $58,983", chip="CoinGecko · 02:08Z",
+         banner="BITCOIN: $58,983", chip="CoinGecko · Sat 21 Nov",
          headline="Bitcoin trades below $59,000 on Saturday",
          summary="Down 3.9% in 24 hours to $58,983; ether slides to $1,625.",
          sources="CoinGecko"),
@@ -110,9 +110,9 @@ STORIES = [
          sources="Formula 1"),
     dict(id=13, region="OCEANIA", beat="Cricket", tag="CONFIRMED", utc="2026-11-21T03:45",
          place="WELLINGTON, NZ", lat=-41.3, lon=174.8,
-         banner="RAHUL: 124*", chip="Tea, day 3 · AFP",
+         banner="RAHUL: 124*", chip="Wellington · AFP",
          headline="KL Rahul hits a century against New Zealand",
-         summary="Unbeaten 124* at tea; India 344 for 2 replying to 368.",
+         summary="Hits unbeaten 124* on Day 3; India 344 for 2 replying to 368.",
          sources="AFP, ESPNcricinfo"),
 
     # ----------------------------------------------------------- briefs (14-40)
@@ -206,8 +206,8 @@ KPIS = [
     dict(figure="5", story=2, caption=("Houthi missiles downed", "over Riyadh & Jizan")),
     dict(figure="6.7", story=3, caption=("magnitude of the quake", "shaking Junín & Lima")),
     dict(figure="146", story=9, caption=("people safe after jet's", "Davao emergency landing")),
-    dict(figure="$58,983", story=11, caption=("bitcoin early Saturday,", "down 3.9% in 24 hours")),
-    dict(figure="124*", story=13, caption=("KL Rahul's score at tea", "vs NZ in Wellington")),
+    dict(figure="$58,983", story=11, caption=("bitcoin on Saturday,", "down 3.9% in 24 hours")),
+    dict(figure="124*", story=13, caption=("KL Rahul's Day 3 ton", "vs NZ in Wellington")),
 ]
 
 DECK = ("COP31 climate talks run past deadline  ·  Five Houthi missiles downed over Saudi Arabia  ·  "
