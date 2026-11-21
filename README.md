@@ -8,8 +8,8 @@ An original editorial front-page visual summary of Saturday 21 November 2026 wor
 
 ## How it is built
 
-- `tools/stories.py` holds the 35 stories (each dated 21 Nov 2026 UTC, with a certainty tag and named sources), the headline figures, the UTC timeline and the date-check lists.
-- `tools/render.py` draws the page at 2048 px with Pillow, using the vector scenes in `tools/art.py` and the locator map in `tools/worldmap.py`, then saves a 1024 x 1024 progressive JPEG as `entry.png`. The build stops if any text overflows or overlaps, or any map pins touch.
-- `main.ts` (Node 22, no network) checks `entry.png` and copies it to `$MAKEFUN_OUTPUT_DIR` (default `/output`).
+- `tools/stories.py` holds 39 verified pure-Saturday stories across all 7 regions and 31 beats (each dated 21 Nov 2026 UTC with zero Friday leaks, named sources, and faithful attribution), 6 headline KPIs, and the `DATE CHECK` exclusion lists.
+- `tools/render.py` draws the front page at 2048 px with Pillow — combining a 69 px serif masthead, 13 high-contrast illustrated cards (`tools/art.py`) with 300 px-readable crimson banners, a deep-navy world atlas (`tools/worldmap.py`, numbered pins 1–13 plus dots for briefs 14–39), and 26 two-column briefs — then saves a deterministic 1024 × 1024 progressive 4:4:4 JPEG as `entry.png`. Strict geometry checks enforce zero text overlaps, zero margin overflows, zero pin collisions, and >= 8 px right-margin slack on every brief.
+- `main.ts` (Node 22, no network) validates `entry.png` and copies it unchanged to `$MAKEFUN_OUTPUT_DIR` (default `/output`).
 
 Rebuild with `python3 tools/render.py`, then run `mkdir -p out && MAKEFUN_OUTPUT_DIR=out node main.ts`.
