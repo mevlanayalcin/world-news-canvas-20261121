@@ -1,22 +1,28 @@
-"""Story data for the Saturday 21 November 2026 front page (v2).
+"""Story data for the Saturday 21 November 2026 front page (v3 Broadsheet Atlas).
 
 Every entry was checked against a live feed item whose publication or event
 time falls on Saturday 2026-11-21 UTC (field ``utc`` is the first Saturday
 report seen, or the USGS origin time for earthquakes). Zero Friday 20 Nov
 stories appear anywhere in STORIES or KPIS.
+
+Verification tiers:
+  CONFIRMED = corroborated by 2+ independent outlets
+  OFFICIAL  = on-the-record authority / agency figure or statement
+  REPORTED  = single outlet or NGO report, attributed by name
+  CLAIM     = one party's unverified military or state-media account
 """
 
 DAY_LABEL = "Saturday 21 November 2026"
 
 REGIONS = [
-    # key, label on the bar / legend, colour
-    ("EUROPE", "EUROPE", "#2B5B9E"),
-    ("ASIA", "ASIA-PACIFIC", "#C45519"),
-    ("MIDEAST", "MIDDLE EAST", "#A62E38"),
-    ("AMERICAS", "AMERICAS", "#2B7A4B"),
-    ("AFRICA", "AFRICA", "#A87408"),
-    ("OCEANIA", "OCEANIA", "#1A8292"),
-    ("GLOBAL", "GLOBAL", "#654794"),
+    # key, label on the bar / legend, archival editorial colour
+    ("EUROPE", "EUROPE", "#1F4A6E"),
+    ("ASIA", "ASIA-PACIFIC", "#B84E1D"),
+    ("MIDEAST", "MIDDLE EAST", "#9C2B35"),
+    ("AMERICAS", "AMERICAS", "#266B47"),
+    ("AFRICA", "AFRICA", "#A86E12"),
+    ("OCEANIA", "OCEANIA", "#186F7A"),
+    ("GLOBAL", "GLOBAL", "#5F4486"),
 ]
 
 # fmt: off
@@ -24,21 +30,21 @@ STORIES = [
     # ---------------------------------------------------------------- leads (1-3)
     dict(id=1, region="GLOBAL", beat="Climate", tag="CONFIRMED", utc="2026-11-21T14:33",
          place="ANTALYA, TÜRKIYE", lat=36.9, lon=30.7,
-         banner="COP31: OVERTIME", sub="No deal · Day 13", chip="Ongoing · AP, Guardian",
+         banner="COP31: OVERTIME", sub="No deal · Day 13", chip="AP · Guardian",
          headline="COP31 runs into overtime with no fossil-fuel deal",
          summary="Talks pass Friday's close; EU (\"good deal or no deal\", ~130 backers) and "
                  "Panama reject a draft omitting fossil fuels as venue teardown begins.",
          sources="AP, Guardian, Al-Monitor"),
     dict(id=2, region="MIDEAST", beat="Conflict", tag="OFFICIAL", utc="2026-11-21T04:15",
          place="RIYADH, SAUDI ARABIA", lat=24.7, lon=46.7,
-         banner="RIYADH: MISSILES", sub="3 downed · alerts", chip="Coalition · Reuters, AP",
+         banner="RIYADH: MISSILES", sub="3 downed · alerts", chip="Coalition · Reuters",
          headline="Saudi air defences down three Houthi missiles over Riyadh",
          summary="The Saudi-led coalition says air defences destroyed three ballistic missiles "
                  "aimed at the capital early Saturday amid citywide alerts; no casualties reported.",
          sources="Coalition; Reuters, AP"),
     dict(id=3, region="EUROPE", beat="War", tag="OFFICIAL", utc="2026-11-21T10:55",
          place="KRYVYI RIH, UKRAINE", lat=47.9, lon=33.4,
-         banner="KRYVYI RIH: STRIKE", sub="2 dead · ~60 hurt", chip="Officials · AP, Kyiv Ind.",
+         banner="KRYVYI RIH: STRIKE", sub="2 dead · 60 hurt", chip="Officials · AP",
          headline="Russian double-tap strike kills 2, injures 60 in Kryvyi Rih",
          summary="Local officials say a 7-year-old boy and a 20-year-old paramedic died when "
                  "drones hit rescuers in Zelensky's hometown after an initial missile strike.",
@@ -58,20 +64,20 @@ STORIES = [
          summary="Deep 108 km tremor rattled Lima; IGP reports no deaths or tsunami.",
          sources="USGS, IGP"),
     dict(id=6, region="ASIA", beat="Earthquake", tag="OFFICIAL", utc="2026-11-21T09:42",
-         place="BANDA SEA, TIMOR-LESTE", lat=-8.1, lon=127.9,
+         place="TIMOR-LESTE", lat=-8.1, lon=127.9,
          banner="TIMOR: QUAKE 6.8", chip="USGS · GFZ",
          headline="M6.8 quake strikes off Timor-Leste, felt in Darwin",
          summary="Hit 105 km NE of Lospalos at 09:42 UTC; no tsunami threat.",
          sources="USGS, ABC"),
-    dict(id=7, region="ASIA", beat="Aviation", tag="OFFICIAL", utc="2026-11-21T02:10",
+    dict(id=7, region="ASIA", beat="Aviation", tag="CONFIRMED", utc="2026-11-21T02:10",
          place="DAVAO, PHILIPPINES", lat=7.1, lon=125.6,
-         banner="DAVAO: 146 SAFE", chip="Airline · AP",
+         banner="DAVAO: 146 SAFE", chip="CAAP · AP",
          headline="Air Niugini jet makes emergency landing; 146 safe",
          summary="Boeing 767 diverted on engine fire alert on HK–Port Moresby flight.",
          sources="CAAP, AP"),
     dict(id=8, region="AMERICAS", beat="Cyber", tag="REPORTED", utc="2026-11-21T13:20",
          place="WASHINGTON, US", lat=38.9, lon=-77.0,
-         banner="FBI: NCIC HACK", chip="Reported · Guardian",
+         banner="FBI: NCIC HACK", chip="Guardian · AP",
          headline="FBI probes apparent NCIC database cyberattack",
          summary="Apparent breach targets key US police warrants and crime records.",
          sources="Guardian, AP"),
@@ -83,20 +89,20 @@ STORIES = [
          headline="Mexico captures FBI top-10 fugitive 'Chapo Isidro'",
          summary="Alleged Beltran Leyva chief seized after raid; clashes followed.",
          sources="BBC, Guardian"),
-    dict(id=10, region="ASIA", beat="Trade", tag="OFFICIAL", utc="2026-11-21T13:46",
+    dict(id=10, region="ASIA", beat="Trade", tag="CONFIRMED", utc="2026-11-21T13:46",
          place="BRUSSELS · JAKARTA", lat=-6.2, lon=106.8,
          banner="EU–INDONESIA DEAL", chip="Signed · Reuters",
          headline="EU and Indonesia sign landmark CEPA trade pact",
          summary="Cuts tariffs on 98.5% of lines after a decade of negotiations.",
          sources="Reuters, Al Jazeera"),
-    dict(id=11, region="MIDEAST", beat="Military", tag="REPORTED", utc="2026-11-21T09:10",
+    dict(id=11, region="MIDEAST", beat="Military", tag="CLAIM", utc="2026-11-21T09:10",
          place="TEHRAN, IRAN", lat=35.7, lon=51.4,
          banner="IRAN: LAUNCHER", chip="State TV · AP",
          headline="Iran airs bunker launcher; vows uranium stays",
          summary="IRGC airs dual-missile bunker; FM rejects transferring uranium abroad.",
          sources="IRIB, AP"),
     dict(id=12, region="GLOBAL", beat="AI Arms", tag="CONFIRMED", utc="2026-11-21T05:36",
-         place="GENEVA, SWITZERLAND", lat=46.2, lon=6.1,
+         place="GENEVA", lat=46.2, lon=6.1,
          banner="GENEVA: AI ARMS", chip="Talks · AP, Reuters",
          headline="UN 'killer robot' talks end with no binding treaty",
          summary="States extend autonomous-weapons talks two years toward 2028 rules.",
@@ -130,7 +136,7 @@ STORIES = [
     dict(id=20, region="MIDEAST", beat="Conflict", tag="REPORTED", utc="2026-11-21T12:29",
          place="Gaza City", lat=31.5, lon=34.5,
          brief="Israeli strike hits food truck, killing at least 3: medics", sources="AP, AJ"),
-    dict(id=21, region="MIDEAST", beat="Maritime", tag="REPORTED", utc="2026-11-21T09:30",
+    dict(id=21, region="MIDEAST", beat="Maritime", tag="CLAIM", utc="2026-11-21T09:30",
          place="Hormuz", lat=26.6, lon=56.3,
          brief="UKMTO tanker alerts; IRGC claims US drones hit", sources="Reuters, AJ"),
     dict(id=22, region="MIDEAST", beat="Security", tag="REPORTED", utc="2026-11-21T11:10",
@@ -139,9 +145,9 @@ STORIES = [
     dict(id=23, region="ASIA", beat="Health", tag="OFFICIAL", utc="2026-11-21T14:39",
          place="Manipur", lat=24.8, lon=93.9,
          brief="Toxic-liquor toll hits 16 dead, 200+ hospitalized", sources="NDTV, Hindu"),
-    dict(id=24, region="ASIA", beat="Transport", tag="REPORTED", utc="2026-11-21T10:40",
-         place="Ranchi", lat=23.3, lon=85.3,
-         brief="Cyclone Akvan remnants force 14 flight cancellations", sources="The Hindu"),
+    dict(id=24, region="ASIA", beat="Environment", tag="OFFICIAL", utc="2026-11-21T09:05",
+         place="Bangkok", lat=13.8, lon=100.5,
+         brief="Six-point plan targets arsenic in northern rivers", sources="The Nation"),
     dict(id=25, region="ASIA", beat="Tech", tag="REPORTED", utc="2026-11-21T05:55",
          place="New Delhi", lat=28.6, lon=77.2,
          brief="Opposition protests at Meta offices over bans", sources="Reuters"),
@@ -203,17 +209,17 @@ KPIS = [
 DECK = ("COP31 stretches into overtime  ·  Saudi air defences down 3 missiles over Riyadh  ·  "
         "Double-tap strike hits Kryvyi Rih  ·  Quakes rattle Peru & Timor-Leste")
 
-# Friday 20 November stories left out as yesterday's news, and unconfirmed / upcoming items.
+# Friday 20 Nov / earlier stories excluded as prior-day news, plus unconfirmed / upcoming items.
 EXCLUDED_FRIDAY = [
-    "UK–EU reset deal", "Russian missiles in Poland", "Denmark expels attaché",
-    "Palisades arson verdict", "$7.25bn Roundup ruling", "Trump data-centre tax",
-    "Argentina $50.75bn LNG", "Haiti–El Salvador prisons", "Iraq\u00a0Jurf\u00a0al-Sakhar",
-    "Wall St correction",
+    "Wall\u00a0St\u00a0correction", "UK–EU\u00a0reset\u00a0deal", "Missiles\u00a0in\u00a0Poland",
+    "Kyiv\u00a0bridges\u00a0barrage", "Denmark\u00a0expels\u00a0attaché", "Palisades\u00a0arson\u00a0verdict",
+    "$7.25bn\u00a0Roundup\u00a0ruling", "Trump\u00a0data-centre\u00a0tax", "Argentina\u00a0$50.75bn\u00a0LNG",
+    "Cyclone\u00a0Akvan\u00a0landfall", "Voyager\u00a01\u00a0light-day\u00a0(18\u00a0Nov)",
 ]
 NOT_YET = [
     "COP31 final text (no deal at press time)",
+    "BepiColombo Mercury orbit burn (18:24–19:01 UTC, awaiting ESA confirmation)",
     "Las Vegas GP race (Sun 22 Nov UTC)",
-    "BepiColombo Mercury orbit burn (18:24–19:01 UTC, unconfirmed at press time)",
 ]
 
 
@@ -242,7 +248,7 @@ def validate():
     for s in STORIES:
         assert s["region"] in keys, s
         assert s["utc"].startswith("2026-11-21T"), s
-        assert s["tag"] in ("CONFIRMED", "OFFICIAL", "REPORTED"), s
+        assert s["tag"] in ("CONFIRMED", "OFFICIAL", "REPORTED", "CLAIM"), s
         assert s["sources"], s
     assert sum(region_counts().values()) == len(STORIES) == 39
     assert all(v > 0 for v in region_counts().values())
