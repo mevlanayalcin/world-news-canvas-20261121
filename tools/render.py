@@ -536,8 +536,12 @@ def date_check(b, y0, y1):
     lines = l1 + l2
     if len(lines) > 3:
         raise SystemExit(f"LAYOUT: date check needs {len(lines)} lines (max 3)")
-    lh = (y1 - y0 - 7) / max(len(lines), 3)
-    draw_wrapped(b, x, y0 + 4.5 + lh * 0.72, lines, lh, "datecheck", maxw)
+    n_lines = len(lines)
+    lh = 14.5 if n_lines == 2 else (y1 - y0 - 7) / 3
+    block_h = (n_lines - 1) * lh
+    # Optically center the 2 or 3 text lines vertically inside the DATE CHECK box
+    y_first = (y0 + y1) / 2 - block_h / 2 + 3.4
+    draw_wrapped(b, x, y_first, lines, lh, "datecheck", maxw)
 
 
 def verification_bar(b, y0, y1):

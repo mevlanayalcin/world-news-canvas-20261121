@@ -1,9 +1,9 @@
-"""Original silkscreen-editorial vector illustrations, one per illustrated story (ids 1-13).
+"""Original silkscreen-editorial vector illustrations, one per illustrated story (ids 1-13, v4).
 
 Each scene draws into an 8x supersampled Pen in 1x layout coordinates and
-downsamples with LANCZOS for razor-sharp printmaking edges. In v3 every art
-panel sits unobstructed ABOVE its full-width banner ribbon, so all 13 scenes
-use luminous, balanced full-frame compositions with high legibility at 300px.
+downsamples with LANCZOS for razor-sharp printmaking edges. Every art panel
+sits unobstructed ABOVE its full-width banner ribbon, giving crisp full-frame
+visual storytelling legible at both 1024px and 300px thumbnail sizes.
 Everything is 100% deterministic (fixed-seed LCG only).
 """
 import math
@@ -151,8 +151,8 @@ def smoke(p, x, y, dx, dy, r0, r1, n, color, alpha=165, seed=9):
     rnd = Rand(seed)
     for i in range(n):
         t = i / max(1, n - 1)
-        cx = x + dx * t + rnd.uniform(-1.6, 1.6)
-        cy = y + dy * t + rnd.uniform(-1.1, 1.1)
+        cx = x + dx * t + rnd.uniform(-1.5, 1.5)
+        cy = y + dy * t + rnd.uniform(-1.0, 1.0)
         r = r0 + (r1 - r0) * t
         p.circle(cx, cy, r, rgb(color, round(alpha * (1 - 0.5 * t))))
 
@@ -175,20 +175,12 @@ def flames(p, cx, base, w, h, seed=5):
 def seismo(p, x0, x1, y, amp, color, seed=7, width=1.1, burst=0.5):
     rnd = Rand(seed)
     pts = []
-    n = 130
+    n = 150
     for i in range(n + 1):
         t = i / n
-        env = math.exp(-((t - burst) ** 2) / 0.008) + 0.07
+        env = math.exp(-((t - burst) ** 2) / 0.007) + 0.06
         pts.append((x0 + (x1 - x0) * t, y + amp * env * rnd.uniform(-1, 1)))
     p.line(pts, color, width)
-
-
-def pine(p, x, base, h, color):
-    for k in range(3):
-        top = base - h + k * h * 0.22
-        wid = h * (0.24 + k * 0.1)
-        p.poly([(x, top), (x - wid, top + h * 0.42), (x + wid, top + h * 0.42)], color)
-    p.rect(x - h * 0.04, base - h * 0.15, x + h * 0.04, base, color)
 
 
 def delta_drone(p, cx, cy, s, color, tilt=0.0):
@@ -226,7 +218,7 @@ def star5(p, cx, cy, r, fill):
 
 # ------------------------------------------------------------------ scenes
 def scene_cop31(p):
-    """1. COP31 Antalya: Mediterranean sunrise, oil derrick vs wind turbines, plenary dome & overtime clock."""
+    """1. COP31 Antalya: Mediterranean sunrise, oil derrick vs wind turbines, plenary hall & overtime clock."""
     w, h = p.w, p.h
     p.vgrad(0, h * 0.74, "#F2C794", "#FBF0DC")
     p.glow(w * 0.50, h * 0.60, h * 0.75, "#FFE3A6", 140)
@@ -234,7 +226,6 @@ def scene_cop31(p):
     ridge(p, h * 0.70, h * 0.07, 2.3, 1.9, "#A37F6A", y_floor=h * 0.78)
     waves(p, h * 0.75, h, "#2D7899", "#174A66", n=3, seed=11)
 
-    # Left: dark steel oil derrick + pumpjack (the fossil-fuel deadlock)
     dx, base = w * 0.14, h * 0.79
     p.poly([(dx - 13, base), (dx - 3, base - 52), (dx + 3, base - 52), (dx + 13, base)],
            None, "#322723", 1.5)
@@ -248,7 +239,6 @@ def scene_cop31(p):
     p.rect(dx - 26, base - 9, dx - 14, base, "#261E1A", r=1.2)
     p.rect(dx - 26, base - 6.5, dx - 14, base - 5.0, "#DFAD3B")
 
-    # Right: three crisp white wind turbines (clean energy transition)
     for tx, th, ang in ((w * 0.78, 42, 72), (w * 0.86, 56, 14), (w * 0.94, 46, 48)):
         top = base - th
         p.poly([(tx - 1.5, base), (tx - 0.6, top), (tx + 0.6, top), (tx + 1.5, base)], "#FFFFFF", "#8C9CA6", 0.4)
@@ -257,7 +247,6 @@ def scene_cop31(p):
             p.line([(tx, top), (tx + math.cos(a) * th * 0.40, top + math.sin(a) * th * 0.40)], "#FFFFFF", 1.7)
         p.circle(tx, top, 1.7, "#3B4A54")
 
-    # Center: Antalya COP31 plenary pavilion + delegate flags
     hx0, hx1, hy = w * 0.30, w * 0.68, h * 0.80
     p.rect(hx0, hy - 18, hx1, hy, "#F2ECE0", "#7D6F61", 0.7)
     p.poly([(hx0 - 6, hy - 18), ((hx0 + hx1) / 2, hy - 31), (hx1 + 6, hy - 18)],
@@ -271,7 +260,6 @@ def scene_cop31(p):
         p.line([(x, hy), (x, hy - 28)], "#4B423A", 0.6)
         p.rect(x, hy - 28, x + 6.2, hy - 23.5, c)
 
-    # Center-top: crisp archival brass-rimmed overtime clock + "+1 DAY" seal
     cx, cy, cr = w * 0.49, h * 0.28, 20.0
     p.circle(cx + 1.0, cy + 1.5, cr + 2.2, (50, 35, 20, 55))
     p.circle(cx, cy, cr + 2.2, "#182A40")
@@ -293,15 +281,14 @@ def scene_cop31(p):
     p.text(cx + cr + 27, cy + 0.2, "+1 DAY", 9.0, "#FFFFFF")
 
 
-def scene_riyadh(p):
-    """2. Riyadh Missiles: midnight slate-indigo sky, illuminated Riyadh skyline, 3 interception bursts."""
+def scene_saudi_missiles(p):
+    """2. Saudi 5 Missiles: midnight slate-indigo sky, Riyadh skyline + 5 interception bursts."""
     w, h = p.w, p.h
     p.vgrad(0, h, "#10213D", "#233F6B")
     stars(p, 85, 29, y1=h * 0.68)
-    p.glow(w * 0.52, h * 0.84, 110, "#F0B954", 88)
+    p.glow(w * 0.50, h * 0.84, 115, "#F0B954", 88)
     p.rect(0, h * 0.78, w, h, "#11203A")
 
-    # Left & center-left Riyadh towers
     for x, bw, bh in [(10, 20, 26), (34, 18, 34), (56, 22, 24), (82, 18, 38), (104, 24, 30)]:
         p.rect(x, h - bh, x + bw, h, "#182B4A", "#375585", 0.6)
         for yy in range(int(h - bh + 4), int(h - 4), 5):
@@ -309,194 +296,219 @@ def scene_riyadh(p):
                 if ((int(xx) * 7 + yy * 13) % 5) < 3:
                     p.rect(xx, yy, xx + 1.8, yy + 2.1, "#F7C960")
 
-    # Centered iconic Kingdom Centre tower (parabolic cutout arch)
-    kx, kh = w * 0.48, 60.0
+    kx, kh = w * 0.48, 58.0
     p.poly([(kx - 11, h), (kx - 9.5, h - kh), (kx + 9.5, h - kh), (kx + 11, h)], "#213860", "#7C9ED1", 0.8)
-    p.poly([(kx - 5.5, h - kh + 1), (kx + 5.5, h - kh + 1), (kx + 3.8, h - kh + 16),
-            (kx, h - kh + 20), (kx - 3.8, h - kh + 16)], "#1A325A")
+    p.poly([(kx - 5.5, h - kh + 1), (kx + 5.5, h - kh + 1), (kx + 3.8, h - kh + 15),
+            (kx, h - kh + 19), (kx - 3.8, h - kh + 15)], "#1A325A")
     p.line([(kx - 7.5, h - kh + 2), (kx + 7.5, h - kh + 2)], "#FFE59E", 1.2)
-    for yy in range(int(h - kh + 23), int(h - 4), 5):
+    for yy in range(int(h - kh + 22), int(h - 4), 5):
         for xx in (kx - 6, kx - 2, kx + 2, kx + 5):
             p.rect(xx, yy, xx + 1.8, yy + 2.0, "#F9D06B")
 
-    # Al Faisaliah pyramid spire + golden orb
-    fx, fh = w * 0.64, 50.0
+    fx, fh = w * 0.64, 48.0
     p.poly([(fx - 12, h), (fx, h - fh), (fx + 12, h)], "#1D3358", "#7C9ED1", 0.8)
     p.line([(fx, h - fh), (fx, h - fh - 7)], "#B0CBF0", 1.0)
-    p.circle(fx, h - fh + 10, 4.0, "#F8C846", "#FFF2B2", 0.6)
+    p.circle(fx, h - fh + 10, 3.8, "#F8C846", "#FFF2B2", 0.6)
     for k in range(5):
-        yy = h - 7 - k * 7.5
+        yy = h - 7 - k * 7.2
         hw = 9 - k * 1.4
         p.line([(fx - hw, yy), (fx + hw, yy)], rgb("#F8D374", 190), 0.85)
 
-    # KAFD right towers
-    for x, bw, bh in [(w * 0.74, 18, 42), (w * 0.82, 20, 48), (w * 0.90, 22, 34)]:
+    for x, bw, bh in [(w * 0.74, 18, 40), (w * 0.82, 20, 46), (w * 0.90, 22, 32)]:
         p.poly([(x, h), (x, h - bh), (x + bw, h - bh + 6), (x + bw, h)], "#1B3054", "#6486BA", 0.7)
         for yy in range(int(h - bh + 8), int(h - 4), 5):
             for xx in range(int(x + 3), int(x + bw - 3), 4):
                 p.rect(xx, yy, xx + 1.8, yy + 2.0, "#F5C65D")
 
-    # 3 incoming dotted arcs + rising defence interceptors + bright amber starbursts across full sky
+    # 5 intercepted Houthi missiles (3 over Riyadh left-center + 2 over Jizan right)
     bursts = [
-        ((w * 0.28, h * 0.26), (w * 0.02, h * 0.04), (w * 0.36, h * 0.72), 12.5),
-        ((w * 0.56, h * 0.22), (w * 0.86, h * 0.02), (w * 0.52, h * 0.66), 13.5),
-        ((w * 0.80, h * 0.30), (w * 0.99, h * 0.10), (w * 0.72, h * 0.70), 11.5),
+        ((w * 0.18, h * 0.30), (w * 0.01, h * 0.08), (w * 0.24, h * 0.72), 9.5),
+        ((w * 0.36, h * 0.20), (w * 0.14, h * 0.01), (w * 0.40, h * 0.68), 11.5),
+        ((w * 0.56, h * 0.24), (w * 0.76, h * 0.02), (w * 0.52, h * 0.66), 12.0),
+        ((w * 0.74, h * 0.22), (w * 0.92, h * 0.02), (w * 0.70, h * 0.68), 10.5),
+        ((w * 0.88, h * 0.34), (w * 1.00, h * 0.14), (w * 0.82, h * 0.72), 9.5),
     ]
     for (bx, by), (sx, sy), (ix, iy), br in bursts:
-        steps = 14
+        steps = 12
         for k in range(steps):
             if k % 2 == 1:
                 continue
-            t0, t1 = k / steps, (k + 0.7) / steps
+            t0, t1 = k / steps, (k + 0.68) / steps
             x0 = sx + (bx - sx) * t0
-            y0 = sy + (by - sy) * t0 - math.sin(t0 * math.pi) * 5
+            y0 = sy + (by - sy) * t0 - math.sin(t0 * math.pi) * 4
             x1 = sx + (bx - sx) * t1
-            y1 = sy + (by - sy) * t1 - math.sin(t1 * math.pi) * 5
-            p.line([(x0, y0), (x1, y1)], "#FF7849", 1.6)
-        p.line([(ix, iy), (bx, by)], rgb("#80E2FF", 195), 1.35)
-        p.line([(ix + (bx - ix) * 0.48, iy + (by - iy) * 0.48), (bx, by)], "#FFFFFF", 1.0)
-        p.glow(bx, by, br * 2.0, "#FF9E2C", 180, steps=12)
+            y1 = sy + (by - sy) * t1 - math.sin(t1 * math.pi) * 4
+            p.line([(x0, y0), (x1, y1)], "#FF7849", 1.4)
+        p.line([(ix, iy), (bx, by)], rgb("#80E2FF", 190), 1.2)
+        p.glow(bx, by, br * 1.9, "#FF9E2C", 175, steps=12)
         starburst(p, bx, by, br, br * 0.38, "#FFB338", "#FFF9D6", rays=10)
 
 
-def scene_kryvyi(p):
-    """3. Kryvyi Rih Strike: luminous slate-amber dusk, skyline, plume, drone & rescue ambulance."""
+def scene_peru_hero(p):
+    """3. Peru M6.7 Quake (Hero 320x94): Andean snowcaps, Lima houses + bold cream seismograph."""
     w, h = p.w, p.h
-    p.vgrad(0, h, "#6E8AA6", "#E8C6A3")
-    p.glow(w * 0.42, h * 0.54, 48, "#FF8138", 150)
-
-    # Crisp Ukraine blue/gold edge band along left frame
-    p.rect(0, 0, 4.5, h * 0.5, "#0057B7")
-    p.rect(0, h * 0.5, 4.5, h, "#FFD700")
-
-    # Apartment blocks across city skyline
-    blocks = [
-        (10, 34, 40), (48, 36, 48), (88, 38, 56), (130, 40, 52),
-        (174, 36, 44), (214, 38, 48), (256, 36, 42), (296, 22, 36),
-    ]
-    rnd = Rand(17)
-    for i, (x, bw, bh) in enumerate(blocks):
-        top = h - bh
-        col = "#4E5866" if i % 2 == 0 else "#5E6A79"
-        p.rect(x, top, x + bw, h, col, "#353D47", 0.5)
-        for yy in range(int(top + 5), int(h - 8), 6):
-            for xx in range(int(x + 4), int(x + bw - 5), 6):
-                lit = rnd.next() > 0.68
-                p.rect(xx, yy, xx + 3.0, yy + 3.4, "#F8D57E" if lit else "#343B44")
-
-    # Plume & fiery impact centered on block 3 (x=107, y=38)
-    hx, hy = 107.0, h - 56.0
-    smoke(p, hx, hy, 44, -38, 6.5, 19, 15, "#2F333B", 195, seed=31)
-    flames(p, hx, hy + 7, 22, 16, seed=12)
-    p.glow(hx, hy + 4, 24, "#FF7A2F", 160)
-
-    # Diving double-tap delta drone in clear upper-right sky
-    p.line([(w * 0.92, h * 0.08), (w * 0.78, h * 0.28)], rgb("#FFFFFF", 215), 1.4)
-    delta_drone(p, w * 0.77, h * 0.29, 8.2, "#1A1E24", tilt=2.45)
-
-    # Rescue ambulance in lower-center-right foreground (clear of tiny right chip)
-    p.rect(4.5, h - 8, w, h, "#252B33")
-    ax, ay = w * 0.62, h - 7
-    p.glow(ax - 7, ay - 19, 11, "#3898FF", 180, steps=10)
-    p.rect(ax - 26, ay - 18, ax + 13, ay - 2, "#FFFFFF", "#1C242E", 0.9, r=2)
-    p.poly([(ax + 13, ay - 15), (ax + 22, ay - 15), (ax + 27, ay - 8.5), (ax + 27, ay - 2),
-            (ax + 13, ay - 2)], "#FFFFFF", "#1C242E", 0.9)
-    p.poly([(ax + 15, ay - 13.5), (ax + 21.5, ay - 13.5), (ax + 24.5, ay - 9), (ax + 15, ay - 9)], "#7FB8E0")
-    p.rect(ax - 26, ay - 6.5, ax + 26, ay - 4.2, "#C82222")
-    cx, cy = ax - 7, ay - 11.8
-    p.rect(cx - 4.6, cy - 1.5, cx + 4.6, cy + 1.5, "#C82222")
-    p.rect(cx - 1.5, cy - 4.6, cx + 1.5, cy + 4.6, "#C82222")
-    p.rect(ax - 10, ay - 21, ax - 4, ay - 18, "#2B88FF")
-    for wx in (ax - 16, ax + 18):
-        p.circle(wx, ay - 1.5, 3.8, "#14181F")
-        p.circle(wx, ay - 1.5, 1.5, "#C8D0D8")
-
-
-def scene_finland(p):
-    """4. Gulf of Finland (Sparta II): bright Nordic horizon, burning freighter + 2 diving drones."""
-    w, h = p.w, p.h
-    p.vgrad(0, h * 0.60, "#B4C8D8", "#ECF2F6")
-    for k, x in enumerate(range(int(w * 0.72), int(w) + 6, 5)):
-        pine(p, x, h * 0.61, 6.5 + (k * 37 % 4), "#324D43")
-    p.rect(w * 0.70, h * 0.60, w, h * 0.62, "#324D43")
-    waves(p, h * 0.60, h, "#3F6D88", "#1F4258", n=3, seed=8)
-
-    bx, by = w * 0.40, h * 0.76
-    p.poly([(bx - 50, by - 6), (bx + 44, by - 6), (bx + 52, by - 12), (bx + 38, by + 5),
-            (bx - 46, by + 5)], "#232B34")
-    p.rect(bx - 49, by - 6, bx + 44, by - 3.8, "#A82824")
-    cols = ["#1F4A6E", "#C85A1C", "#2E7D4F", "#A82824", "#1F4A6E", "#D9A441"]
-    for i, c in enumerate(cols):
-        x = bx - 29 + i * 10.5
-        p.rect(x, by - 13, x + 9.0, by - 6.5, c)
-        if i % 2 == 0:
-            p.rect(x, by - 19, x + 9.0, by - 13.5, cols[(i + 3) % 6])
-    p.rect(bx - 47, by - 20, bx - 33, by - 6, "#F4F1EA")
-    p.rect(bx - 45, by - 24, bx - 36, by - 20, "#F4F1EA")
-    smoke(p, bx - 34, by - 22, 58, -22, 4.0, 12, 13, "#32363E", 180, seed=4)
-    flames(p, bx - 35, by - 17, 16, 14, seed=6)
-    p.glow(bx - 35, by - 14, 19, "#FF9A3C", 150)
-
-    delta_drone(p, w * 0.80, h * 0.22, 7.0, "#18202A", tilt=2.55)
-    delta_drone(p, w * 0.90, h * 0.36, 5.8, "#18202A", tilt=2.65)
-    p.line([(w * 0.84, h * 0.16), (w * 0.96, h * 0.05)], rgb("#FFFFFF", 190), 0.9)
-
-
-def scene_peru(p):
-    """5. Peru M6.7 Quake: bright Andes cordillera + adobe house + crisp archival seismograph."""
-    w, h = p.w, p.h
-    p.vgrad(0, h * 0.65, "#B9D7EC", "#F5F1E7")
-    peaks = [(-8, 0.95), (w * 0.16, 0.24), (w * 0.33, 0.56), (w * 0.54, 0.14),
-             (w * 0.72, 0.48), (w * 0.87, 0.22), (w + 8, 0.82)]
+    p.vgrad(0, h * 0.66, "#9DC7E6", "#F4EFE5")
+    peaks = [(-8, 0.95), (w * 0.11, 0.24), (w * 0.22, 0.54), (w * 0.36, 0.12),
+             (w * 0.50, 0.44), (w * 0.64, 0.16), (w * 0.78, 0.48), (w * 0.90, 0.22), (w + 8, 0.80)]
     pts = [(-8, h)] + [(x, h * y) for x, y in peaks] + [(w + 8, h)]
     p.poly(pts, "#79685A")
     for (x0, y0), (x1, y1), (x2, y2) in zip(peaks, peaks[1:], peaks[2:]):
         if y1 < y0 and y1 < y2:
             px, py = x1, h * y1
-            p.poly([(px, py), (px - 9, py + 10), (px - 3.5, py + 7.5), (px, py + 12),
-                    (px + 4.5, py + 7.5), (px + 9, py + 10)], "#FFFFFF")
-    ridge(p, h * 0.68, h * 0.04, 2.0, 0.5, "#5A7D43", y_floor=h * 0.76)
+            p.poly([(px, py), (px - 14, py + 15), (px - 5, py + 11), (px, py + 18),
+                    (px + 6, py + 11), (px + 14, py + 15)], "#FFFFFF")
+    ridge(p, h * 0.66, h * 0.05, 1.8, 0.4, "#5E8046", y_floor=h * 0.76)
 
-    hx, hy = w * 0.22, h * 0.66
-    p.poly([(hx - 6.5, hy), (hx + 5.5, hy - 1.8), (hx + 4.2, hy - 10), (hx - 7.8, hy - 8.2)],
-           "#F6E9D2", "#5A4535", 0.7)
-    p.poly([(hx - 9.5, hy - 7.8), (hx - 2.0, hy - 14.5), (hx + 6.0, hy - 10)], "#B8472F", "#5A4535", 0.6)
-    p.arc(hx - 2, hy - 8, 12, 190, 250, "#A82824", 0.9)
-    p.arc(hx - 2, hy - 8, 12, 300, 350, "#A82824", 0.9)
+    # Stylized Andean & Lima adobe houses with subtle tremor shake arcs
+    for hx, sc in ((w * 0.14, 1.0), (w * 0.23, 0.85), (w * 0.79, 1.05)):
+        hy = h * 0.66
+        p.poly([(hx - 8 * sc, hy), (hx + 8 * sc, hy - 1.5), (hx + 6.5 * sc, hy - 14 * sc),
+                (hx - 9.5 * sc, hy - 12.5 * sc)], "#F7EBD5", "#5C4736", 0.75)
+        p.poly([(hx - 11.5 * sc, hy - 12 * sc), (hx - 1.5 * sc, hy - 20 * sc),
+                (hx + 9 * sc, hy - 14 * sc)], "#B8472F", "#5C4736", 0.7)
+        p.rect(hx - 3 * sc, hy - 8 * sc, hx + 1.5 * sc, hy - 2 * sc, "#6E523F")
+    p.arc(w * 0.79 - 1, h * 0.56, 17, 195, 250, "#A82824", 1.1)
+    p.arc(w * 0.79 - 1, h * 0.56, 17, 295, 350, "#A82824", 1.1)
 
+    # Clean archival cream seismograph tape across bottom 34% with bold crimson M6.7 spike
     sy0, sy1 = h * 0.66, h
     p.rect(0, sy0, w, sy1, "#FFFDF8")
-    p.line([(0, sy0), (w, sy0)], "#BFB5A3", 0.7)
-    for k in range(1, 14):
-        p.line([(w * k / 14, sy0), (w * k / 14, sy1)], "#ECE4D6", 0.45)
-    seismo(p, 4, w - 4, (sy0 + sy1) / 2, (sy1 - sy0) * 0.44, "#C82222", seed=12, width=1.15, burst=0.45)
+    p.line([(0, sy0), (w, sy0)], "#B8AE9A", 0.8)
+    for k in range(1, 20):
+        p.line([(w * k / 20, sy0), (w * k / 20, sy1)], "#ECE4D6", 0.45)
+    seismo(p, 6, w - 6, (sy0 + sy1) / 2, (sy1 - sy0) * 0.44, "#C82222", seed=12, width=1.35, burst=0.46)
+    p.rect(w * 0.46 + 14, sy0 + 4, w * 0.46 + 64, sy0 + 17, "#A82824", r=2)
+    p.text(w * 0.46 + 39, sy0 + 10.6, "M 6.7", 8.5, "#FFFFFF")
 
 
-def scene_timor(p):
-    """6. Timor-Leste M6.8 Quake: deep bathymetric sea-teal + Timor island + concentric seismic wave."""
+def scene_kyiv_warning(p):
+    """4. Kyiv Warning: Ukrainian blue/gold sky, Kerch bridge span with bold vermilion warning mark."""
     w, h = p.w, p.h
-    p.vgrad(0, h, "#2B7E96", "#17546A")
+    p.vgrad(0, h * 0.58, "#3B7AC4", "#7DB0E4")
+    p.vgrad(h * 0.58, h * 0.72, "#F2CF68", "#F8E39A")
+    waves(p, h * 0.70, h, "#25537A", "#153652", n=3, seed=19)
+
+    # Bridge roadway & iconic white steel arch span across strait
+    by = h * 0.62
+    p.rect(0, by, w, by + 3.5, "#2F3A48")
+    for px in (w * 0.14, w * 0.30, w * 0.70, w * 0.86):
+        p.rect(px - 2.2, by + 3.5, px + 2.2, h * 0.76, "#3C4858")
+    # Central steel arch
+    pts = []
+    for k in range(25):
+        t = k / 24
+        x = w * 0.28 + t * w * 0.44
+        y = by - math.sin(t * math.pi) * 20.0
+        pts.append((x, y))
+    p.line(pts, "#F2F5F8", 2.6)
+    for k in range(1, 8):
+        t = k / 8
+        x = w * 0.28 + t * w * 0.44
+        y = by - math.sin(t * math.pi) * 20.0
+        p.line([(x, by), (x, y)], "#DCE4EC", 0.8)
+
+    # Bold vermilion cross-out warning slash over bridge arch
+    cx, cy = w * 0.50, h * 0.46
+    p.line([(cx - 18, cy - 13), (cx + 18, cy + 13)], "#C82222", 2.6)
+    p.line([(cx + 18, cy - 13), (cx - 18, cy + 13)], "#C82222", 2.6)
+
+
+def scene_hormuz_drone(p):
+    """5. Hormuz Drone: sandstone strait cliffs, turquoise water, tanker + struck recon drone."""
+    w, h = p.w, p.h
+    p.vgrad(0, h * 0.46, "#EBC092", "#F8E7CE")
+    p.poly([(0, h * 0.22), (w * 0.28, h * 0.30), (w * 0.58, h * 0.24), (w, h * 0.32),
+            (w, h * 0.48), (0, h * 0.48)], "#B88E68")
+    waves(p, h * 0.46, h, "#30829C", "#184E66", n=3, seed=15)
+
+    # Oil tanker on left
+    tx, ty = w * 0.30, h * 0.74
+    p.poly([(tx - 32, ty - 4), (tx + 28, ty - 4), (tx + 34, ty - 8), (tx + 26, ty + 4),
+            (tx - 30, ty + 4)], "#7E2E2A")
+    p.rect(tx - 30, ty - 6, tx + 25, ty - 4, "#404852")
+    p.rect(tx - 30, ty - 14, tx - 20, ty - 6, "#F4F1EA")
+    for k in range(3):
+        p.circle(tx - 12 + k * 10, ty - 7, 2.2, "#59626E")
+
+    # Recon drone + burst plume upper-right
+    smoke(p, w * 0.72, h * 0.20, -24, 22, 1.4, 3.8, 10, "#464A52", 155, seed=25)
+    delta_drone(p, w * 0.64, h * 0.36, 8.0, "#1E242C", tilt=2.2)
+    flames(p, w * 0.64, h * 0.39, 9, 8, seed=40)
+    p.glow(w * 0.64, h * 0.36, 12, "#FFB23F", 150)
+
+
+def scene_iran_uranium(p):
+    """6. Iran Uranium: clean archival cream-and-tricolor frame, centrifuge & atomic rings in dome."""
+    w, h = p.w, p.h
+    p.rect(0, 0, w, h, "#F6F2E8")
+    # Crisp thin Iran flag top & bottom accent bands
+    p.rect(0, 0, w, 5.5, "#239F40")
+    p.rect(0, h - 5.5, w, h, "#C82222")
+
+    # Stylized atomic orbit + slate-indigo protective vault dome in center
+    cx, cy = w * 0.48, h * 0.50
+    p.ellipse(cx, cy, 38, 14, None, "#1F4A6E", 1.3)
+    p.ellipse(cx, cy, 14, 22, None, "#186F7A", 1.3)
+    p.circle(cx, cy, 8.5, "#182A40", "#E8B944", 1.4)
+    p.text(cx, cy + 0.3, "U", 9.5, "#FFD25A")
+    # Orbiting electrons
+    for ex, ey in ((cx + 36, cy), (cx - 36, cy), (cx, cy - 21)):
+        p.circle(ex, ey, 2.8, "#A82824", "#FFFFFF", 0.6)
+    # Protective vault padlock badge on left
+    lx, ly = w * 0.16, h * 0.52
+    p.arc(lx, ly - 5, 6.5, 180, 360, "#4A5666", 1.8)
+    p.rect(lx - 8, ly - 5, lx + 8, ly + 8, "#1F4A6E", "#131B26", 0.8, r=2)
+    p.circle(lx, ly + 1, 2.0, "#F0C66E")
+
+
+def scene_trump_ai_tax(p):
+    """7. Trump AI Tax: architectural blueprint slate-blue, overseas AI data servers + vermilion % seal."""
+    w, h = p.w, p.h
+    p.vgrad(0, h, "#1E3C60", "#132944")
     for k in range(1, 5):
-        p.line([(0, h * k / 5), (w, h * k / 5)], rgb("#FFFFFF", 38), 0.4)
-        p.line([(w * k / 5, 0), (w * k / 5, h)], rgb("#FFFFFF", 38), 0.4)
+        p.line([(0, h * k / 5), (w, h * k / 5)], rgb("#8CC4F5", 34), 0.45)
+    for k in range(1, 9):
+        p.line([(w * k / 9, 0), (w * k / 9, h)], rgb("#8CC4F5", 30), 0.45)
 
-    island = [(w * 0.05, h * 0.84), (w * 0.18, h * 0.60), (w * 0.36, h * 0.48), (w * 0.54, h * 0.44),
-              (w * 0.62, h * 0.50), (w * 0.56, h * 0.62), (w * 0.40, h * 0.72), (w * 0.22, h * 0.86),
-              (w * 0.10, h * 0.94)]
-    p.poly(island, "#94C46D", "#5E8A3E", 0.8)
-    p.poly([(w * 0.64, h * 1.04), (w * 0.78, h * 0.80), (w * 1.04, h * 0.74), (w * 1.04, h * 1.04)],
-           "#E5CA8E", "#B59A5E", 0.7)
+    # Overseas AI data-centre server racks left & right
+    for rx in (w * 0.20, w * 0.78):
+        p.rect(rx - 18, 11, rx + 18, h - 10, "#2A507C", "#99C9F5", 0.8, r=2)
+        for row in range(4):
+            yy = 16 + row * 8.5
+            p.rect(rx - 14, yy, rx + 14, yy + 5.2, "#193352")
+            p.circle(rx - 10, yy + 2.6, 1.3, "#5CE6A0")
+            p.circle(rx - 5, yy + 2.6, 1.3, "#FFD24D")
+    p.text(w * 0.78, h * 0.50, "AI", 10.5, rgb("#E6F2FF", 210))
 
-    ex, ey = w * 0.74, h * 0.40
-    for k, (rr, col, wdt) in enumerate([(25, "#FF6458", 1.0), (18, "#FF3B30", 1.15),
-                                        (12, "#FFFFFF", 1.2), (6.5, "#FF3B30", 1.2)]):
-        p.circle(ex, ey, rr, rgb("#FF3B30", 24 + k * 14), col, wdt)
-    star5(p, ex, ey, 5.2, "#FFD23F")
-    p.circle(ex, ey, 1.7, "#A82824")
+    # Central bold vermilion & gold "%" tariff stamp
+    cx, cy = w * 0.49, h * 0.49
+    p.circle(cx, cy, 17.5, "#A82824", "#F4C858", 1.5)
+    p.text(cx, cy + 0.5, "%", 18.0, "#FFFFFF")
+
+
+def scene_china_japan(p):
+    """8. China-Japan: diplomatic crimson & white flag panels divided by bold slate tension bolt."""
+    w, h = p.w, p.h
+    # Left half: China crimson with gold stars
+    p.rect(0, 0, w * 0.50, h, "#C82222")
+    star5(p, w * 0.16, h * 0.36, 7.5, "#FFDE00")
+    for sx, sy in ((w * 0.27, h * 0.20), (w * 0.31, h * 0.32), (w * 0.31, h * 0.48), (w * 0.26, h * 0.60)):
+        star5(p, sx, sy, 2.7, "#FFDE00")
+
+    # Right half: Japan crisp white with sun disc
+    p.rect(w * 0.50, 0, w, h, "#FAF8F4")
+    p.circle(w * 0.76, h * 0.48, 13.5, "#BC002D")
+
+    # Center diplomatic friction divider + Taiwan island emblem
+    p.line([(w * 0.50, 0), (w * 0.50, h)], "#182A40", 1.2)
+    p.circle(w * 0.50, h * 0.48, 12.5, "#182A40", "#F0C66E", 1.2)
+    p.line([(w * 0.44, h * 0.48), (w * 0.56, h * 0.48)], "#FFFFFF", 1.8)
+    p.poly([(w * 0.43, h * 0.48), (w * 0.47, h * 0.41), (w * 0.47, h * 0.55)], "#F0C66E")
+    p.poly([(w * 0.57, h * 0.48), (w * 0.53, h * 0.41), (w * 0.53, h * 0.55)], "#F0C66E")
 
 
 def scene_davao(p):
-    """7. Davao Air Niugini 146 Safe: luminous tropical sky + runway + white 767 + alert & chute."""
+    """9. Davao Air Niugini 146 Safe: luminous tropical sky + runway + white 767 + alert & chute."""
     w, h = p.w, p.h
     p.vgrad(0, h * 0.68, "#82BEE8", "#EAF6FD")
     ridge(p, h * 0.63, h * 0.08, 1.4, 0.5, "#74A380", y_floor=h * 0.70)
@@ -507,11 +519,9 @@ def scene_davao(p):
         p.rect(x0, h * 0.82, x0 + 13, h * 0.86, "#EDF2F7")
 
     px, py = w * 0.46, h * 0.61
-    # Tail fin (Air Niugini black/red/gold — cleanly centered in open sky!)
     p.poly([(px - 42, py - 2), (px - 53, py - 18), (px - 42, py - 18), (px - 31, py - 3)], "#181D24")
     p.poly([(px - 50, py - 16), (px - 43, py - 16), (px - 37.5, py - 8), (px - 44.5, py - 8)], "#D7262E")
     p.circle(px - 44, py - 12, 2.0, "#FFD23F")
-    # Fuselage
     p.poly([(px - 46, py - 2), (px + 42, py - 4.5), (px + 54, py - 1), (px + 52, py + 4),
             (px - 40, py + 4)], "#FFFFFF", "#3A4450", 0.7)
     p.rect(px + 38, py - 3.2, px + 47, py - 1.0, "#1C2A3A")
@@ -523,214 +533,141 @@ def scene_davao(p):
     p.circle(px + 2, py + 5.2, 2.6, "#FF6A1A")
     p.circle(px + 2, py + 5.2, 1.2, "#FFE680")
     smoke(p, px - 2, py + 4.8, -24, -3.5, 1.6, 4.8, 8, "#FFFFFF", 165, seed=21)
-    # Yellow-white evacuation chute
     p.poly([(px + 26, py + 3), (px + 33, py + 3), (px + 43, h * 0.85), (px + 34, h * 0.85)],
            "#FFF3C4", "#7D6F4B", 0.7)
 
 
-def scene_fbi_ncic(p):
-    """8. FBI NCIC Hack: architectural blueprint-blue terminal + server stack + gold-rimmed shield."""
+def scene_canberra_ai(p):
+    """10. Canberra AI Talks: sunlit ivory-teal sky, Parliament spire + Beijing roof + central AI dialogue node."""
     w, h = p.w, p.h
-    p.vgrad(0, h, "#22446B", "#173252")
-    for k in range(1, 5):
-        p.line([(0, h * k / 5), (w, h * k / 5)], rgb("#8CC4F5", 38), 0.45)
-    for k in range(1, 9):
-        p.line([(w * k / 9, 0), (w * k / 9, h)], rgb("#8CC4F5", 34), 0.45)
+    p.vgrad(0, h, "#D7EBF0", "#F6F2E8")
+    p.rect(0, h * 0.76, w, h, "#5E8B63")
 
-    # Clean NCIC database cylinder stack on left
-    dx, dy, rw = w * 0.28, h * 0.54, 24.0
-    for k in range(3):
-        yy = dy + 11 - k * 10.5
-        p.rect(dx - rw, yy - 5.5, dx + rw, yy + 3, "#3669A0", "#AED8FF", 0.7)
-        p.ellipse(dx, yy + 3, rw, 4.0, "#295485", "#AED8FF", 0.7)
-        p.ellipse(dx, yy - 5.5, rw, 4.0, "#4B83BE", "#CBE5FF", 0.7)
-        p.circle(dx - rw + 7, yy - 1, 1.4, "#5CE6A0")
-        p.circle(dx - rw + 12, yy - 1, 1.4, "#FF5252")
+    # Left: Canberra Parliament House spire silhouette
+    px = w * 0.18
+    p.rect(px - 22, h * 0.62, px + 22, h * 0.76, "#FFFFFF", "#7B8A96", 0.7)
+    p.line([(px - 12, h * 0.62), (px, h * 0.24), (px + 12, h * 0.62)], "#687886", 1.3)
+    p.line([(px, h * 0.24), (px, h * 0.12)], "#687886", 1.1)
+    p.rect(px, h * 0.12, px + 9, h * 0.18, "#1F4A6E")
 
-    # Crimson breach trace linking server stack to federal shield
-    p.line([(dx + rw + 2, dy), (w * 0.50, dy), (w * 0.54, dy - 10),
-            (w * 0.59, dy + 6), (w * 0.65, dy - 2)], "#FF5A4E", 1.7)
-
-    # Federal navy/gold shield + crimson breach alert triangle on right
-    sx, sy = w * 0.75, h * 0.48
-    shield = [(sx, sy - 18), (sx + 17, sy - 12.5), (sx + 15, sy + 4), (sx, sy + 17),
-              (sx - 15, sy + 4), (sx - 17, sy - 12.5)]
-    p.poly(shield, "#183359", "#F0C35A", 1.4)
-    p.glow(sx, sy, 18, "#FF4238", 130, steps=10)
-    p.poly([(sx, sy - 11.5), (sx - 11.5, sy + 8), (sx + 11.5, sy + 8)], "#C82222", "#FFFFFF", 1.0)
-    p.rect(sx - 1.2, sy - 5.8, sx + 1.2, sy + 1.8, "#FFFFFF")
-    p.circle(sx, sy + 4.8, 1.3, "#FFFFFF")
-
-
-def scene_sinaloa(p):
-    """9. Sinaloa Capture: warm terracotta-violet desert twilight + helicopter beam + silver handcuffs."""
-    w, h = p.w, p.h
-    p.vgrad(0, h * 0.74, "#56386B", "#F09454")
-    p.glow(w * 0.52, h * 0.70, 44, "#FFC86E", 145)
-    ridge(p, h * 0.62, h * 0.12, 1.4, 1.0, "#7A4752", y_floor=h * 0.85)
-    ridge(p, h * 0.76, h * 0.05, 2.2, 0.2, "#472932", y_floor=h)
-    p.rect(0, h * 0.82, w, h, "#28181F")
-
-    # Military helicopter in open upper-right sky sweeping pale-gold searchlight
-    hx, hy = w * 0.72, h * 0.24
-    p.d.polygon(p._pts([(hx - 6, hy + 4.5), (hx - 34, h * 0.88), (hx + 10, h * 0.88), (hx + 3, hy + 4.5)]),
-                fill=rgb("#FFF3BE", 85))
-    p.ellipse(hx, hy, 11.5, 4.8, "#181C22")
-    p.poly([(hx + 7, hy - 1.8), (hx + 27, hy - 1.2), (hx + 27, hy + 0.5), (hx + 7, hy + 1.8)], "#181C22")
-    p.poly([(hx + 25, hy - 5.5), (hx + 28, hy - 5.5), (hx + 27, hy + 1), (hx + 24, hy + 1)], "#181C22")
-    p.ellipse(hx - 5.5, hy - 1, 3.8, 2.2, "#F9CC78")
-    p.line([(hx - 19, hy - 6.8), (hx + 19, hy - 6.0)], "#181C22", 1.1)
-    p.line([(hx, hy - 4.5), (hx, hy - 6.4)], "#181C22", 1.2)
-    p.line([(hx - 6, hy + 5.8), (hx + 6, hy + 5.8)], "#181C22", 0.9)
-
-    # Crisp silver interlocking handcuffs centered left
-    cx1, cy1 = w * 0.20, h * 0.52
-    cx2, cy2 = w * 0.40, h * 0.52
-    p.circle(cx1, cy1, 12.2, None, "#F2F5F8", 2.9)
-    p.circle(cx1, cy1, 12.2, None, "#2A3038", 0.6)
-    p.circle(cx2, cy2, 12.2, None, "#F2F5F8", 2.9)
-    p.circle(cx2, cy2, 12.2, None, "#2A3038", 0.6)
-    p.line([(cx1 + 10.5, cy1 - 2.5), (cx2 - 10.5, cy2 - 2.5)], "#D6DCE2", 2.2)
-    p.glow(w * 0.55, h * 0.80, 9, "#FF2D2D", 185, steps=8)
-    p.glow(w * 0.62, h * 0.80, 9, "#2B7FFF", 185, steps=8)
-
-
-def scene_eu_indonesia(p):
-    """10. EU-Indonesia CEPA: archival EU blue/gold star circle + Indonesia red/white + brass seal."""
-    w, h = p.w, p.h
-    p.rect(0, 0, w * 0.5, h, "#0C3B8E")
-    p.rect(w * 0.5, 0, w, h * 0.5, "#C81C2A")
-    p.rect(w * 0.5, h * 0.5, w, h, "#FAF7F0")
-    p.line([(w * 0.5, 0), (w * 0.5, h)], "#182A40", 0.8)
-
-    ex, ey, er = w * 0.24, h * 0.50, 15.0
-    for k in range(12):
-        a = math.radians(-90 + k * 30)
-        star5(p, ex + math.cos(a) * er, ey + math.sin(a) * er, 2.5, "#FFCC00")
-
-    mx, my, mr = w * 0.50, h * 0.50, 16.0
-    p.circle(mx + 1, my + 1.5, mr + 1, (0, 0, 0, 65))
-    p.circle(mx, my, mr, "#F2C338", "#182A40", 1.3)
-    p.circle(mx, my, mr - 2.4, None, "#FFF5C7", 0.7)
-    p.line([(mx - 8.2, my - 3.6), (mx + 5.2, my - 3.6)], "#131B26", 2.1)
-    p.poly([(mx + 9.4, my - 3.6), (mx + 4.0, my - 7.2), (mx + 4.0, my)], "#131B26")
-    p.line([(mx + 8.2, my + 3.6), (mx - 5.2, my + 3.6)], "#131B26", 2.1)
-    p.poly([(mx - 9.4, my + 3.6), (mx - 4.0, my), (mx - 4.0, my + 7.2)], "#131B26")
-
-
-def scene_iran_launcher(p):
-    """11. Iran Underground Launcher: crisp geological mountain-bunker cross-section + twin rails."""
-    w, h = p.w, p.h
-    p.vgrad(0, h * 0.48, "#DDE5EC", "#F3EDE2")
-    # Sandstone mountain ridge over subterranean cavern
-    ridge(p, h * 0.34, h * 0.14, 1.3, 0.6, "#C4A47C", y_floor=h)
-    p.rect(0, h * 0.42, w, h, "#A98963")
-    # Subterranean reinforced concrete vault cutaway
-    p.ellipse(w * 0.52, h * 0.96, w * 0.44, h * 0.72, "#394454", "#6B788A", 1.3)
-    p.ellipse(w * 0.52, h * 0.96, w * 0.38, h * 0.62, "#222B38")
-    p.rect(0, h * 0.80, w, h, "#465161")
-
-    # Mobile TEL truck + twin angled ballistic missiles centered cleanly in bunker arch
-    tx, ty = w * 0.52, h * 0.82
-    p.rect(tx - 28, ty - 9, tx + 26, ty - 1.5, "#4E5C4A", "#1C231A", 0.7, r=1.5)
-    p.rect(tx + 17, ty - 13, tx + 28, ty - 1.5, "#5E6E58", "#1C231A", 0.7, r=1.5)
-    p.rect(tx + 20, ty - 11.5, tx + 26, ty - 8, "#A6CDE6")
-    for wx in (tx - 21, tx - 9, tx + 4, tx + 20):
-        p.circle(wx, ty - 1, 3.6, "#14181F")
-        p.circle(wx, ty - 1, 1.4, "#929DA8")
-
-    ang = math.radians(-26)
-    ca, sa = math.cos(ang), math.sin(ang)
-    for off_x, off_y in ((0, -4.5), (3.5, 2.5)):
-        bx0, by0 = tx - 20 + off_x, ty - 10 + off_y
-        length = 44.0
-        bx1, by1 = bx0 + ca * length, by0 + sa * length
-        p.line([(bx0 - 2.5, by0 + 3.0), (bx1 - 4.5, by1 + 3.0)], "#7E8B9C", 1.5)
-        p.line([(bx0, by0), (bx1, by1)], "#EEF2F6", 3.8)
-        nx, ny = bx1 + ca * 6.5, by1 + sa * 6.5
-        px, py = -sa * 2.1, ca * 2.1
-        p.poly([(nx, ny), (bx1 + px, by1 + py), (bx1 - px, by1 - py)], "#C82822")
-
-    # Subtle Iran flag accent stripe bottom-left
-    fx0, fy0 = 6, h - 10
-    p.rect(fx0, fy0, fx0 + 34, fy0 + 2.2, "#239F40")
-    p.rect(fx0, fy0 + 2.2, fx0 + 34, fy0 + 4.4, "#FFFFFF")
-    p.rect(fx0, fy0 + 4.4, fx0 + 34, fy0 + 6.6, "#DA0000")
-
-
-def scene_geneva_ai(p):
-    """12. Geneva UN 'Killer Robot' Talks: luminous UN blue + robot visor + deadlock slash + 2028."""
-    w, h = p.w, p.h
-    p.vgrad(0, h, "#4584C4", "#245791")
+    # Right: Beijing ceremonial pavilion roofline
+    bx = w * 0.82
+    p.rect(bx - 18, h * 0.56, bx + 18, h * 0.76, "#D8CFC0", "#7D6E5D", 0.7)
+    p.poly([(bx - 24, h * 0.56), (bx, h * 0.38), (bx + 24, h * 0.56)], "#B8332A", "#6E201A", 0.7)
     for k in range(5):
-        x = 9 + k * 9
-        p.rect(x, h * 0.28, x + 4.2, h, rgb("#FFFFFF", 36))
-    p.poly([(6, h * 0.28), (54, h * 0.28), (30, h * 0.14)], rgb("#FFFFFF", 36))
+        cx = bx - 13 + k * 6.5
+        p.line([(cx, h * 0.56), (cx, h * 0.76)], "#8F2A24", 1.1)
 
-    rx, ry = w * 0.44, h * 0.62
-    p.rect(rx - 14, ry - 15, rx + 14, ry + 3, "#E4EBF2", "#58687A", 0.8, r=3.5)
-    p.rect(rx - 10, ry - 10, rx + 10, ry - 4, "#151D28", r=1.8)
-    p.rect(rx - 7.5, ry - 8.2, rx + 7.5, ry - 5.6, "#FF3B30", r=0.9)
-    p.line([(rx, ry - 15), (rx, ry - 20.5)], "#C2D3E6", 1.1)
-    p.circle(rx, ry - 21, 2.1, "#FF3B30")
-    p.rect(rx - 20, ry + 5, rx + 20, h + 2, "#C3CFDC", "#58687A", 0.8, r=4)
-    p.line([(rx - 18, ry - 14), (rx + 18, ry + 11)], "#FF3B30", 2.1)
-
-    cx0, cy0 = w * 0.68, h * 0.08
-    p.rect(cx0 + 1.5, cy0 + 1.5, cx0 + 46.5, cy0 + 34.5, (0, 0, 0, 70), r=2)
-    p.rect(cx0, cy0, cx0 + 45, cy0 + 33, "#FFFFFF", r=2)
-    p.rect(cx0, cy0, cx0 + 45, cy0 + 9.5, "#A82824", r=2)
-    p.rect(cx0, cy0 + 5.5, cx0 + 45, cy0 + 9.5, "#A82824")
-    p.text(cx0 + 22.5, cy0 + 4.8, "TARGET", 5.5, "#FFFFFF")
-    p.text(cx0 + 22.5, cy0 + 21.8, "2028", 13.0, "#131B26")
+    # Dialogue arcs + glowing central AI node
+    p.line([(px + 14, h * 0.44), (w * 0.50, h * 0.38), (bx - 16, h * 0.44)], "#186F7A", 1.4)
+    p.circle(w * 0.50, h * 0.38, 14.5, "#186F7A", "#FFFFFF", 1.2)
+    p.text(w * 0.50, h * 0.385, "AI", 11.5, "#FFFFFF")
 
 
-def scene_mcg(p):
-    """13. MCG Record 188 Chase: twilight stadium + emerald oval + cricket bat & ball + 188 board."""
+def scene_bitcoin(p):
+    """11. Bitcoin $58,983: crisp dark-slate market ticker, amber coin emblem & vermilion dip below $59k."""
     w, h = p.w, p.h
-    p.vgrad(0, h * 0.44, "#1A3762", "#345C94")
-    for x in (w * 0.08, w * 0.92):
-        p.line([(x, h * 0.48), (x, h * 0.10)], "#B8C6D8", 1.2)
-        p.rect(x - 5.5, h * 0.05, x + 5.5, h * 0.12, "#FFF7D2")
-        p.glow(x, h * 0.09, 20, "#FFF2A8", 135, steps=10)
-
-    p.ellipse(w * 0.5, h * 0.76, w * 0.62, h * 0.48, "#268F44")
+    p.vgrad(0, h, "#162436", "#101B29")
     for k in range(1, 5):
-        p.ellipse(w * 0.5, h * 0.76, w * 0.62 * (1 - k * 0.18), h * 0.48 * (1 - k * 0.18),
-                  None, rgb("#3CB05A", 140), 1.8)
-    p.rect(w * 0.45, h * 0.54, w * 0.53, h * 0.96, "#E3CFA0")
+        p.line([(0, h * k / 5), (w, h * k / 5)], rgb("#FFFFFF", 24), 0.45)
+
+    # Dashed $59k threshold line
+    y59 = h * 0.54
+    for x0 in range(44, int(w - 6), 8):
+        p.line([(x0, y59), (x0 + 4, y59)], rgb("#F0C66E", 160), 0.7)
+
+    # Price curve dipping below $59k
+    pts = [
+        (46, h * 0.24), (62, h * 0.28), (78, h * 0.22), (94, h * 0.36),
+        (110, h * 0.34), (124, h * 0.50), (138, h * 0.62), (154, h * 0.70), (168, h * 0.64),
+    ]
+    area = [(pts[0][0], h)] + pts + [(pts[-1][0], h)]
+    p.poly(area, rgb("#D9382E", 55))
+    p.line(pts, "#FF5247", 2.0)
+    p.circle(pts[-2][0], pts[-2][1], 3.0, "#FFD23F", "#C82222", 0.8)
+
+    # Bold amber Bitcoin medallion on left
+    p.circle(23, h * 0.48, 15.0, "#E5941A", "#FFE099", 1.2)
+    p.text(23, h * 0.485, "B", 15.0, "#FFFFFF")
+    p.line([(20.5, h * 0.48 - 10), (20.5, h * 0.48 + 10)], "#FFFFFF", 1.3)
+    p.line([(25.0, h * 0.48 - 10), (25.0, h * 0.48 + 10)], "#FFFFFF", 1.3)
+
+    # Crisp right stats
+    p.text(w - 8, 11, "-3.9%", 9.2, "#FF6B61", anchor="rm")
+    p.text(w - 8, 22, "ETH $1,625", 6.4, "#B8C7D8", F_SANS_BOLD, anchor="rm")
+
+
+def scene_russell_p1(p):
+    """12. Russell P1 Las Vegas: damp night strip circuit, sleek silver-teal F1 car & 1:34.041 timing."""
+    w, h = p.w, p.h
+    p.vgrad(0, h * 0.40, "#142038", "#263A5C")
+    p.rect(0, h * 0.40, w, h, "#252C36")
+    # Neon Strip reflections & damp rain streaks
+    for lx, col in ((22, "#FF4D6D"), (52, "#4CC9F0"), (84, "#F7B801"), (114, "#7209B7")):
+        p.rect(lx, h * 0.14, lx + 14, h * 0.40, rgb(col, 65))
+    # Checkered start/finish band on right
+    fx = w * 0.78
+    for r in range(6):
+        for c in range(2):
+            col = "#FFFFFF" if (r + c) % 2 == 0 else "#181C22"
+            p.rect(fx + c * 5, h * 0.40 + r * 5.4, fx + (c + 1) * 5, h * 0.40 + (r + 1) * 5.4, col)
+
+    # Sleek silver & Petronas-teal F1 car silhouette speeding right
+    cx, cy = w * 0.42, h * 0.70
+    p.poly([(cx - 38, cy + 3), (cx - 32, cy - 8), (cx - 10, cy - 8), (cx + 2, cy - 11),
+            (cx + 18, cy - 4), (cx + 42, cy + 1), (cx + 42, cy + 5), (cx - 38, cy + 5)], "#D6DDE6", "#18202A", 0.6)
+    p.rect(cx - 26, cy - 2, cx + 26, cy + 1.5, "#00A19C")  # teal stripe
+    p.rect(cx - 42, cy - 12, cx - 34, cy - 2, "#18202A")   # rear wing
+    p.rect(cx + 38, cy + 1, cx + 46, cy + 5, "#00A19C")    # front wing
+    p.circle(cx - 2, cy - 10, 3.2, "#1A222C")              # helmet/halo
+    for wx in (cx - 24, cx + 24):
+        p.circle(wx, cy + 4, 6.2, "#12161C")
+        p.circle(wx, cy + 4, 2.8, "#7D8896")
+
+    # Crisp gold-trimmed timing badge upper-right
+    p.rect(w - 58, 5, w - 5, 19, "#11161D", "#F0C842", 0.8, r=1.5)
+    p.text(w - 31.5, 12.2, "1:34.041", 8.0, "#FFD23F")
+
+
+def scene_rahul(p):
+    """13. KL Rahul 124* Wellington: kiwi sky, emerald Basin Reserve oval, willow bat & 124* board."""
+    w, h = p.w, p.h
+    p.vgrad(0, h * 0.42, "#8AC4E8", "#DCEFF9")
+    ridge(p, h * 0.40, h * 0.08, 1.4, 0.9, "#6A9472", y_floor=h * 0.46)
+    p.rect(0, h * 0.42, w, h, "#258C42")
+    for k in range(1, 5):
+        p.ellipse(w * 0.5, h * 0.78, w * 0.62 * (1 - k * 0.18), h * 0.46 * (1 - k * 0.18),
+                  None, rgb("#38AC58", 130), 1.6)
+    p.rect(w * 0.44, h * 0.50, w * 0.54, h * 0.98, "#E3CFA0")
     for dx in (-2.0, 0, 2.0):
-        p.line([(w * 0.49 + dx, h * 0.63), (w * 0.49 + dx, h * 0.55)], "#FFFFFF", 0.7)
+        p.line([(w * 0.49 + dx, h * 0.60), (w * 0.49 + dx, h * 0.50)], "#FFFFFF", 0.8)
 
-    p.poly([(w * 0.16, h * 0.94), (w * 0.30, h * 0.52), (w * 0.36, h * 0.55), (w * 0.22, h * 0.97)],
+    # Raised willow cricket bat + crimson Test leather ball
+    p.poly([(w * 0.18, h * 0.92), (w * 0.30, h * 0.44), (w * 0.37, h * 0.46), (w * 0.25, h * 0.94)],
            "#E9C584", "#7B5B2A", 0.9)
-    p.line([(w * 0.33, h * 0.53), (w * 0.38, h * 0.40)], "#22262E", 2.4)
-    for k in range(5):
-        t = k / 4
-        bx = w * (0.39 + 0.26 * t)
-        by = h * (0.64 - 0.28 * t - 0.06 * math.sin(t * math.pi))
-        p.circle(bx, by, 0.95 + t * 0.5, rgb("#FFFFFF", 95 + k * 25))
-    p.circle(w * 0.67, h * 0.35, 5.2, "#C8102E", "#FFFFFF", 0.6)
-    p.arc(w * 0.67, h * 0.35, 3.4, 110, 250, "#FFFFFF", 0.65)
+    p.line([(w * 0.335, h * 0.45), (w * 0.37, h * 0.31)], "#1F4A6E", 2.6)
+    p.circle(w * 0.61, h * 0.34, 5.2, "#B81D24", "#FFFFFF", 0.6)
+    p.arc(w * 0.61, h * 0.34, 3.4, 110, 250, "#FFFFFF", 0.65)
 
-    p.rect(w * 0.75, h * 0.10, w * 0.96, h * 0.44, "#11161D", "#F0C842", 0.9, r=1.5)
-    p.text(w * 0.855, h * 0.275, "188", 11.2, "#FFD23F")
+    # Crisp dark-and-gold Wellington Test scoreboard "124*"
+    p.rect(w * 0.71, h * 0.10, w * 0.96, h * 0.46, "#11161D", "#F0C842", 0.9, r=1.5)
+    p.text(w * 0.835, h * 0.285, "124*", 10.8, "#FFD23F")
 
 
 SCENES = {
     1: scene_cop31,
-    2: scene_riyadh,
-    3: scene_kryvyi,
-    4: scene_finland,
-    5: scene_peru,
-    6: scene_timor,
-    7: scene_davao,
-    8: scene_fbi_ncic,
-    9: scene_sinaloa,
-    10: scene_eu_indonesia,
-    11: scene_iran_launcher,
-    12: scene_geneva_ai,
-    13: scene_mcg,
+    2: scene_saudi_missiles,
+    3: scene_peru_hero,
+    4: scene_kyiv_warning,
+    5: scene_hormuz_drone,
+    6: scene_iran_uranium,
+    7: scene_trump_ai_tax,
+    8: scene_china_japan,
+    9: scene_davao,
+    10: scene_canberra_ai,
+    11: scene_bitcoin,
+    12: scene_russell_p1,
+    13: scene_rahul,
 }
 
 
