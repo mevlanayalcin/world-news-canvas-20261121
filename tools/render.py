@@ -36,7 +36,7 @@ BRIEF_INK = "#131C26"
 MUTED = "#56606E"
 FOLIO_BG = "#182A40"
 FOLIO_GOLD = "#F0C66E"
-VERMILION = "#A82824"
+VERMILION = "#B22222"
 SLATE_INDIGO = "#1F4A6E"
 
 MAP_OCEAN = "#18364A"
@@ -196,9 +196,9 @@ def draw_wrapped(board, x, y, lines, lh, label, maxw):
 def masthead(b):
     counts = S.region_counts()
 
-    # Signature Midnight Slate-Indigo prestige folio bar (20:30 UTC edition clock)
+    # Signature Midnight Slate-Indigo prestige folio bar (22:00 UTC edition clock)
     b.rect(M, 8, W - M, 25, fill=FOLIO_BG)
-    bl = b.text(M + 8, 16.7, "GLOBAL DISPATCH · 21 NOV · 20:30 UTC", "sans_k", 8.6, FOLIO_GOLD,
+    bl = b.text(M + 8, 16.7, "GLOBAL DISPATCH · 21 NOV · 22:00 UTC", "sans_k", 8.6, FOLIO_GOLD,
                 anchor="lm", spacing=1.0, label="kicker")
     stats = (f"{len(S.STORIES)} VERIFIED STORIES · {len(counts)} REGIONS · "
              f"EVERY ONE DATED {S.DAY_LABEL.upper()}")
@@ -280,9 +280,9 @@ def art_ribbon(b, x, y, text, size, h, max_w, sid):
     while sz > 10.5 and (b.measure(text, "sans_k", sz) + 2 * pad_x) > max_w:
         sz -= 0.25
     tw = b.measure(text, "sans_k", sz) + 2 * pad_x
-    # Crisp drop shadow + high-contrast deep vermilion ribbon with 1.1px white frame
-    b.rect(x + 1.3, y + 1.6, x + tw + 1.3, y + h + 1.6, fill=(0, 0, 0, 95))
-    b.rect(x, y, x + tw, y + h, fill=VERMILION, outline="#FFFFFF", width=1.15)
+    # Crisp drop shadow + high-contrast deep broadcast crimson ribbon with 1.25px white frame
+    b.rect(x + 1.5, y + 1.8, x + tw + 1.5, y + h + 1.8, fill=(0, 0, 0, 115))
+    b.rect(x, y, x + tw, y + h, fill=VERMILION, outline="#FFFFFF", width=1.25)
     b.text(x + tw / 2, y + h / 2 + 0.4, text, "sans_k", sz, "#FFFFFF", anchor="mm",
            label=f"banner:{sid}")
     return tw
@@ -352,8 +352,8 @@ def card(b, st, x, y, w, art_h, lead):
     my = y + art_h + (9.5 if lead else 8.5)
     meta_line(b, x, my, w, st, 8.2 if lead else 7.2, 6.2 if lead else 5.2, lead)
 
-    hy = my + (8.6 if lead else 7.2)
-    hsize, hlh = (17.8, 19.4) if lead else (12.3, 13.6)
+    hy = my + (8.4 if lead else 7.0)
+    hsize, hlh = (18.4, 19.7) if lead else (12.5, 13.7)
     hl = rich_wrap(b, tokens(st["headline"], "serif_b", hsize, INK), w)
     if len(hl) > 2:
         raise SystemExit(f"LAYOUT: headline {st['id']} needs {len(hl)} lines (max 2)")
@@ -375,7 +375,7 @@ def card(b, st, x, y, w, art_h, lead):
 
 
 def world_map(b, x, y, w, h):
-    b.text(x, y, "WORLD ATLAS · ALL 40 STORIES MAPPED", "sans_k", 9.1, INK, anchor="lt",
+    b.text(x, y, "WORLD ATLAS · STORIES BY LOCATION", "sans_k", 9.1, INK, anchor="lt",
            spacing=0.4, label="map-title")
     my = y + 15.0
     box = (x, my, w, h)
@@ -404,7 +404,7 @@ def world_map(b, x, y, w, h):
     b.d = ImageDraw.Draw(b.img, "RGBA")
     b.rect(x, my, x + w, my + h, outline="#102535", width=0.8)
 
-    # Briefs 14-40 as crisp white-ringed regional dots underneath pins 1-13
+    # Briefs 14-40 as crisp white-ringed regional dots underneath pins
     for st in S.STORIES[13:]:
         if st.get("lat") is None or st.get("lon") is None:
             continue
@@ -413,16 +413,17 @@ def world_map(b, x, y, w, h):
             raise SystemExit(f"LAYOUT: brief dot {st['id']} outside map box ({dx:.1f}, {dy:.1f})")
         b.circle(dx, dy, 2.6, region_color(st["region"]), "#FFFFFF", 0.6)
 
-    # Collision-free numbered pins 1-13 with crisp white leader lines
+    # Collision-free numbered pins for geographic leads (skip non-geographic #11 Global Markets)
+    geo_leads = [st for st in S.STORIES[:13] if st.get("lat") is not None and st.get("lon") is not None]
     R = 6.5
     gap = 2 * R + 1.8
     placed = []
     truths = []
-    for st in S.STORIES[:13]:
+    for st in geo_leads:
         tx, ty = worldmap.project(st["lon"], st["lat"], box)
         truths.append((tx, ty))
 
-    for idx, st in enumerate(S.STORIES[:13]):
+    for idx, st in enumerate(geo_leads):
         tx, ty = truths[idx]
         best = None
         for ring in range(0, 10):
@@ -460,7 +461,7 @@ def world_map(b, x, y, w, h):
 
     # Caption + balanced 2-row 7-region legend (4 + 3)
     cap_y = my + h + 10.0
-    b.text(x, cap_y, "Numbered pins: illustrated 1–13  ·  Dots: briefs 14–40", "sans_b", 7.6,
+    b.text(x, cap_y, "Pins: 1–13 (#11 global)  ·  Dots: briefs (co-located share city)", "sans_b", 7.4,
            "#3C4654", anchor="lm", label="map-cap")
     ky = cap_y + 13.0
     for row_items in (S.REGIONS[:4], S.REGIONS[4:]):
@@ -507,7 +508,7 @@ def briefs(b, x, y, w):
     b.rect(note_x, note_y - 6.2, note_x + colw, note_y + 6.2, fill=TILE_BG, outline=TILE_BORDER,
            width=0.6, r=2.0)
     b.text(note_x + colw / 2, note_y + 0.2,
-           "All 40 items verified dated Saturday 21 Nov 2026 UTC · Zero Friday leaks",
+           "40 stories · 7 regions · Saturday 21 Nov 2026 (22:00 UTC edition)",
            "nar_i", 9.6, "#3C4654", anchor="mm", label="briefs-note")
 
     end_y = y + 22.0 + (rows - 1) * lh + 7.5
@@ -582,8 +583,8 @@ def verification_bar(b, y0, y1):
 
 
 def footer(b, y):
-    left = ("Every story happened, or was first reported, on Saturday 21 November 2026 (UTC). "
-            "Sources are named beside every story.")
+    left = ("Every story happened, updated, or was widely reported on Saturday 21 November 2026 · "
+            "Sources named beside every item.")
     right = "Original editorial drawings & cartography"
     bl = b.text(M, y, left, "sans_i", 8.2, "#35404E", anchor="lm", label="footer-l")
     br = b.text(W - M, y, right, "sans_b", 8.2, "#35404E", anchor="rm", label="footer-r")

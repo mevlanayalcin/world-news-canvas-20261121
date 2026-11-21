@@ -432,11 +432,13 @@ def scene_hormuz_drone(p):
     for k in range(3):
         p.circle(tx - 12 + k * 10, ty - 7, 2.2, "#59626E")
 
-    # Burning drone cleanly in open right sky (clear of upper-left banner!)
+    # Two claimed recon drones (burning drone + second distant drone) in open right sky
     smoke(p, w * 0.84, h * 0.22, -22, 22, 1.5, 4.0, 10, "#464A52", 160, seed=25)
     delta_drone(p, w * 0.77, h * 0.38, 8.2, "#1E242C", tilt=2.2)
     flames(p, w * 0.77, h * 0.41, 9, 8, seed=40)
     p.glow(w * 0.77, h * 0.38, 12, "#FFB23F", 150)
+    delta_drone(p, w * 0.90, h * 0.17, 5.4, "#1E242C", tilt=2.5)
+    p.glow(w * 0.90, h * 0.17, 6.5, "#FFB23F", 130, steps=8)
 
 
 def scene_iran_uranium(p):
@@ -683,9 +685,9 @@ def scene_rahul(p):
     p.circle(w * 0.63, h * 0.47, 5.2, "#B81D24", "#FFFFFF", 0.6)
     p.arc(w * 0.63, h * 0.47, 3.4, 110, 250, "#FFFFFF", 0.65)
 
-    # Crisp dark-and-gold Wellington Test scoreboard "124*" in upper-right clear zone
+    # Crisp dark-and-gold Wellington Test scoreboard "136" in upper-right clear zone
     p.rect(w * 0.72, 5, w - 5, 29, "#11161D", "#F0C842", 0.9, r=1.5)
-    p.text(w * 0.85, 17.5, "124*", 10.8, "#FFD23F")
+    p.text(w * 0.85, 17.5, "136", 11.4, "#FFD23F")
 
 
 SCENES = {
