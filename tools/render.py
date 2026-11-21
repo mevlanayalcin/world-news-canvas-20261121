@@ -1,4 +1,4 @@
-"""Render the Saturday 21 November 2026 Broadsheet Atlas (v3).
+"""Render the Saturday 21 November 2026 Broadsheet Atlas (v5 — 40 verified stories).
 
     python3 tools/render.py [--out entry.png] [--report /tmp/report.json] [--thumb /tmp/thumb.png]
 
@@ -25,7 +25,7 @@ W = H = 1024
 M = 16
 CW = W - 2 * M  # 992
 
-# Signature v3 Archival Broadsheet Palette
+# Signature Archival Broadsheet Palette
 PAPER = "#FAF6EE"
 TILE_BG = "#F2ECE0"
 TILE_BORDER = "#D7CEBC"
@@ -123,7 +123,6 @@ class Board:
                 x -= total
             elif anchor[0] == "m":
                 x -= total / 2
-            # Always align tracked glyphs on font-metrics ascender/middle/baseline so '·' / '–' never float
             v_anc = "a" if anchor[1] == "t" else anchor[1]
             cx = x
             for ch in s:
@@ -196,15 +195,14 @@ def draw_wrapped(board, x, y, lines, lh, label, maxw):
 # ------------------------------------------------------------------ blocks
 def masthead(b):
     counts = S.region_counts()
-    beats = len({s["beat"] for s in S.STORIES})
 
     # Signature Midnight Slate-Indigo prestige folio bar
     b.rect(M, 8, W - M, 25, fill=FOLIO_BG)
     bl = b.text(M + 8, 16.7, "GLOBAL DISPATCH · EDITION 21 NOV", "sans_k", 8.6, FOLIO_GOLD,
                 anchor="lm", spacing=1.0, label="kicker")
-    stats = (f"{len(S.STORIES)} VERIFIED STORIES · {len(counts)} REGIONS · {beats} BEATS · "
-             f"{S.DAY_LABEL.upper()}")
-    br = b.text(W - M - 8, 16.7, stats, "sans_b", 8.4, "#F5F1E8", anchor="rm", label="stats")
+    stats = (f"{len(S.STORIES)} VERIFIED STORIES · {len(counts)} REGIONS · "
+             f"EVERY ONE DATED {S.DAY_LABEL.upper()}")
+    br = b.text(W - M - 8, 16.7, stats, "sans_b", 8.5, "#F5F1E8", anchor="rm", label="stats")
     if bl[2] + 12 > br[0]:
         raise SystemExit(f"LAYOUT: masthead folio bar collides ({bl[2]:.1f} vs {br[0]:.1f})")
 
@@ -224,7 +222,7 @@ def masthead(b):
     return tsize
 
 
-def kpi_row(b, y0=115, y1=158):
+def kpi_row(b, y0=115, y1=157):
     n = len(S.KPIS)
     gap = 6.0
     tw = (CW - (n - 1) * gap) / n
@@ -233,19 +231,19 @@ def kpi_row(b, y0=115, y1=158):
         accent = VERMILION if i % 2 == 0 else SLATE_INDIGO
         b.rect(x, y0, x + tw, y1, fill=TILE_BG, outline=TILE_BORDER, width=0.7)
         b.rect(x, y0, x + tw, y0 + 2.6, fill=accent)
-        bf = b.text(x + 7.5, y0 + 5.0, k["figure"], "serif_b", 20.0, INK, anchor="lt",
+        bf = b.text(x + 7.5, y0 + 4.8, k["figure"], "serif_b", 20.0, INK, anchor="lt",
                     label=f"kpi{i}")
         b.fit(f"kpi{i}", bf[2], x + tw, 4)
         for j, cap in enumerate(k["caption"]):
-            bx = b.text(x + 7.5, y0 + 25.0 + j * 9.5, cap, "sans", 8.8, BODY_INK, anchor="lt",
+            bx = b.text(x + 7.5, y0 + 24.6 + j * 9.3, cap, "sans", 8.8, BODY_INK, anchor="lt",
                         label=f"kpi{i}c{j}")
             b.fit(f"kpi{i}c{j}", bx[2], x + tw, 4)
 
 
-def region_bar(b, y0=162, y1=176):
+def region_bar(b, y0=161, y1=175):
     counts = S.region_counts()
     total = sum(counts.values())
-    assert total == len(S.STORIES) == 39
+    assert total == len(S.STORIES) == 40
 
     floor_w = 82.0
     keys = [k for k, _, _ in S.REGIONS]
@@ -276,23 +274,47 @@ def region_bar(b, y0=162, y1=176):
         x += seg
 
 
-def art_attrib(b, x, y_bot, w, text, size, h):
-    pad_x = 5.0
+def art_ribbon(b, x, y, text, size, h, max_w, sid):
+    sz = size
+    pad_x = 7.5 if size >= 15 else 5.5
+    while sz > 10.5 and (b.measure(text, "sans_k", sz) + 2 * pad_x) > max_w:
+        sz -= 0.25
+    tw = b.measure(text, "sans_k", sz) + 2 * pad_x
+    # Crisp drop shadow + high-contrast deep vermilion ribbon with 1.1px white frame
+    b.rect(x + 1.3, y + 1.6, x + tw + 1.3, y + h + 1.6, fill=(0, 0, 0, 95))
+    b.rect(x, y, x + tw, y + h, fill=VERMILION, outline="#FFFFFF", width=1.15)
+    b.text(x + tw / 2, y + h / 2 + 0.4, text, "sans_k", sz, "#FFFFFF", anchor="mm",
+           label=f"banner:{sid}")
+    return tw
+
+
+def art_subpill(b, x, y, text, size, h, sid):
+    pad_x = 6.0 if size >= 9.5 else 4.8
+    tw = b.measure(text, "sans_k", size) + 2 * pad_x
+    b.rect(x + 1.0, y + 1.2, x + tw + 1.0, y + h + 1.2, fill=(0, 0, 0, 65), r=2.0)
+    b.rect(x, y, x + tw, y + h, fill="#FFFFFF", outline=(19, 27, 38, 175), width=0.7, r=2.0)
+    b.text(x + tw / 2, y + h / 2 + 0.2, text, "sans_k", size, INK, anchor="mm",
+           label=f"sub:{sid}")
+    return tw
+
+
+def art_attrib(b, x, y_bot, w, text, align_right, size, h, sid):
+    pad_x = 5.2
     tw = b.measure(text, "sans_b", size) + 2 * pad_x
-    x0 = x + w - tw
-    x1 = x + w
-    b.rect(x0, y_bot - h, x1, y_bot, fill=(19, 27, 38, 225))
+    x0 = (x + w - tw) if align_right else x
+    x1 = (x + w) if align_right else (x + tw)
+    b.rect(x0, y_bot - h, x1, y_bot, fill=(19, 27, 38, 232))
     b.text((x0 + x1) / 2, y_bot - h / 2 + 0.2, text, "sans_b", size, "#F5F2EB", anchor="mm",
-           label=f"chip:{text}")
+           label=f"chip:{sid}")
 
 
-def tag_pill(b, xr, cy, tag, size, h):
+def tag_pill(b, xr, cy, tag, size, h, sid):
     fg, bg = TAG_STYLE[tag]
     pad_x = 5.0 if size >= 7.0 else 4.0
     tw = b.measure(tag, "sans_k", size) + 2 * pad_x
     x0 = xr - tw
     b.rect(x0, cy - h / 2, xr, cy + h / 2, fill=bg, outline=fg, width=0.75, r=h / 2)
-    b.text((x0 + xr) / 2, cy + 0.25, tag, "sans_k", size, fg, anchor="mm", label=f"tag:{tag}")
+    b.text((x0 + xr) / 2, cy + 0.25, tag, "sans_k", size, fg, anchor="mm", label=f"tag:{sid}")
     return x0
 
 
@@ -301,7 +323,7 @@ def meta_line(b, x, y, w, st, size, badge_r, lead):
     b.circle(x + badge_r, y, badge_r, col)
     b.text(x + badge_r, y + 0.3, str(st["id"]), "sans_k", badge_r * 1.15, "#FFFFFF", anchor="mm",
            label=f"badge{st['id']}")
-    px0 = tag_pill(b, x + w, y, st["tag"], 7.1 if lead else 6.4, 13.0 if lead else 11.6)
+    px0 = tag_pill(b, x + w, y, st["tag"], 7.1 if lead else 6.4, 13.0 if lead else 11.6, st["id"])
     label = f"{st['place']} · {st['beat'].upper()}" if lead else st["place"]
     tx = x + badge_r * 2 + 4.5
     avail = px0 - tx - 4.0
@@ -313,51 +335,25 @@ def meta_line(b, x, y, w, st, size, badge_r, lead):
 
 
 def card(b, st, x, y, w, art_h, lead):
-    col = region_color(st["region"])
     im = art.draw_scene(st["id"], w, art_h, out_scale=K)
     b.img.paste(im, (round(x * K), round(y * K)))
-    b.rect(x, y, x + w, y + art_h, outline="#C4BAA7", width=0.6)
+    b.rect(x, y, x + w, y + art_h, outline="#BEB4A0", width=0.65)
 
     if lead:
-        art_attrib(b, x, y + art_h, w, st["chip"], size=7.6, h=12.5)
-        # Full-width deep-vermilion kicker band RIGHT BELOW art (zero art collision, massive 300px pop!)
-        bh = 23.0
-        by0 = y + art_h
-        b.rect(x, by0, x + w, by0 + bh, fill=VERMILION)
-        # Crisp warm-ivory right stat pill inside banner band
-        sub_txt = st["sub"]
-        spw = b.measure(sub_txt, "sans_k", 9.0) + 11.0
-        sx0 = x + w - spw - 4.0
-        b.rect(sx0, by0 + 3.2, x + w - 4.0, by0 + bh - 3.2, fill=PAPER, r=2.0)
-        b.text((sx0 + x + w - 4.0) / 2, by0 + bh / 2 + 0.2, sub_txt, "sans_k", 9.0, INK,
-               anchor="mm", label=f"sub:{st['id']}")
-        # Giant bold white kicker headline left-aligned
-        bsz = 15.2
-        while bsz > 11.5 and b.measure(st["banner"], "sans_k", bsz) > (sx0 - x - 12.0):
-            bsz -= 0.25
-        bx = b.text(x + 7.0, by0 + bh / 2 + 0.35, st["banner"], "sans_k", bsz, "#FFFFFF",
-                    anchor="lm", label=f"banner:{st['id']}")
-        b.fit(f"banner:{st['id']}", bx[2], sx0, 4.0)
-        bar_bot = by0 + bh
+        art_ribbon(b, x + 5, y + 5, st["banner"], 17.6, 27, w - 10, st["id"])
+        art_subpill(b, x + 5, y + 36, st["sub"], 10.2, 18, st["id"])
+        art_attrib(b, x, y + art_h, w, st["chip"], align_right=False, size=8.0, h=14.0, sid=st["id"])
     else:
-        art_attrib(b, x, y + art_h, w, st["chip"], size=6.8, h=11.0)
-        # Full-width region-colored kicker band RIGHT BELOW art
-        bh = 18.0
-        by0 = y + art_h
-        b.rect(x, by0, x + w, by0 + bh, fill=col)
-        bsz = 11.8
-        while bsz > 9.4 and b.measure(st["banner"], "sans_k", bsz) > (w - 10.0):
-            bsz -= 0.2
-        bx = b.text(x + 5.5, by0 + bh / 2 + 0.3, st["banner"], "sans_k", bsz, "#FFFFFF",
-                    anchor="lm", label=f"banner:{st['id']}")
-        b.fit(f"banner:{st['id']}", bx[2], x + w, 4.0)
-        bar_bot = by0 + bh
+        art_ribbon(b, x + 4, y + 4, st["banner"], 13.6, 21, w - 8, st["id"])
+        if st.get("sub"):
+            art_subpill(b, x + 4, y + 28, st["sub"], 8.4, 14.5, st["id"])
+        art_attrib(b, x, y + art_h, w, st["chip"], align_right=True, size=7.0, h=12.0, sid=st["id"])
 
-    my = bar_bot + (9.5 if lead else 8.5)
-    meta_line(b, x, my, w, st, 8.1 if lead else 7.2, 6.2 if lead else 5.2, lead)
+    my = y + art_h + (9.5 if lead else 8.5)
+    meta_line(b, x, my, w, st, 8.2 if lead else 7.2, 6.2 if lead else 5.2, lead)
 
     hy = my + (8.6 if lead else 7.2)
-    hsize, hlh = (17.5, 19.2) if lead else (12.2, 13.5)
+    hsize, hlh = (17.8, 19.4) if lead else (12.3, 13.6)
     hl = rich_wrap(b, tokens(st["headline"], "serif_b", hsize, INK), w)
     if len(hl) > 2:
         raise SystemExit(f"LAYOUT: headline {st['id']} needs {len(hl)} lines (max 2)")
@@ -379,7 +375,7 @@ def card(b, st, x, y, w, art_h, lead):
 
 
 def world_map(b, x, y, w, h):
-    b.text(x, y, "WORLD ATLAS · ALL 39 STORIES MAPPED", "sans_k", 9.1, INK, anchor="lt",
+    b.text(x, y, "WORLD ATLAS · ALL 40 STORIES MAPPED", "sans_k", 9.1, INK, anchor="lt",
            spacing=0.4, label="map-title")
     my = y + 15.0
     box = (x, my, w, h)
@@ -408,7 +404,7 @@ def world_map(b, x, y, w, h):
     b.d = ImageDraw.Draw(b.img, "RGBA")
     b.rect(x, my, x + w, my + h, outline="#102535", width=0.8)
 
-    # Briefs 14-39 as crisp white-ringed regional dots underneath pins 1-13
+    # Briefs 14-40 as crisp white-ringed regional dots underneath pins 1-13
     for st in S.STORIES[13:]:
         if st.get("lat") is None or st.get("lon") is None:
             continue
@@ -463,8 +459,8 @@ def world_map(b, x, y, w, h):
         b.pins.append((round(cx, 2), round(cy, 2), R, st["id"]))
 
     # Caption + balanced 2-row 7-region legend (4 + 3)
-    cap_y = my + h + 9.5
-    b.text(x, cap_y, "Numbered pins: illustrated 1–13  ·  Dots: briefs 14–39", "sans_b", 7.6,
+    cap_y = my + h + 10.0
+    b.text(x, cap_y, "Numbered pins: illustrated 1–13  ·  Dots: briefs 14–40", "sans_b", 7.6,
            "#3C4654", anchor="lm", label="map-cap")
     ky = cap_y + 13.0
     for row_items in (S.REGIONS[:4], S.REGIONS[4:]):
@@ -474,37 +470,47 @@ def world_map(b, x, y, w, h):
             bx = b.text(kx + 9.0, ky + 0.2, label, "sans_b", 7.5, MUTED, anchor="lm", label=f"key-{key}")
             b.fit(f"map-key-{key}", bx[2], x + w)
             kx = bx[2] + 9.5
-        ky += 12.2
-    return ky - 4
+        ky += 12.4
+    return ky - 3
 
 
 def briefs(b, x, y, w):
-    b.text(x, y, "ALSO ON SATURDAY 21 NOVEMBER 2026 — 26 MORE STORIES", "sans_k", 9.1, INK,
+    b.text(x, y, "ALSO ON SATURDAY 21 NOVEMBER 2026 — 27 MORE STORIES", "sans_k", 9.1, INK,
            anchor="lt", spacing=0.4, label="briefs-title")
-    rows = 13
+    rows = 14
     col_gap = 14.0
     colw = (w - col_gap) / 2
-    lh = 16.2
+    lh = 15.5
     items = S.STORIES[13:]
-    assert len(items) == 26
+    assert len(items) == 27
     for i, st in enumerate(items):
         c, r = divmod(i, rows)
         cx = x + c * (colw + col_gap)
-        cy = y + 23.0 + r * lh
+        cy = y + 22.0 + r * lh
         col = region_color(st["region"])
-        b.circle(cx + 6.2, cy, 6.2, col)
-        b.text(cx + 6.2, cy + 0.3, str(st["id"]), "sans_k", 6.8, "#FFFFFF", anchor="mm",
+        b.circle(cx + 6.0, cy, 6.0, col)
+        b.text(cx + 6.0, cy + 0.3, str(st["id"]), "sans_k", 6.6, "#FFFFFF", anchor="mm",
                label=f"bd{st['id']}")
         runs = [
-            (st["place"], "nar_b", 10.8, BRIEF_INK),
-            (" " + st["brief"], "nar", 10.8, BRIEF_INK),
+            (st["place"], "nar_b", 10.9, BRIEF_INK),
+            (" " + st["brief"], "nar", 10.9, BRIEF_INK),
             ("  " + st["sources"], "nar_i", 10.4, MUTED),
         ]
-        _, right = b.runs(cx + 15.8, cy + 0.2, runs, f"brief{st['id']}", anchor_v="m")
+        _, right = b.runs(cx + 15.2, cy + 0.2, runs, f"brief{st['id']}", anchor_v="m")
         b.fit(f"brief{st['id']}", right, cx + colw, 8.0)
         if r < rows - 1:
-            b.hline(cx + 15.8, cx + colw, cy + lh / 2, "#E8E1D3", 0.5)
-    end_y = y + 23.0 + (rows - 1) * lh + 7.0
+            b.hline(cx + 15.2, cx + colw, cy + lh / 2, "#E8E1D3", 0.5)
+
+    # Balanced archival colophon in slot 14 of right column (aligns both columns evenly!)
+    note_x = x + (colw + col_gap)
+    note_y = y + 22.0 + 13 * lh
+    b.rect(note_x, note_y - 6.2, note_x + colw, note_y + 6.2, fill=TILE_BG, outline=TILE_BORDER,
+           width=0.6, r=2.0)
+    b.text(note_x + colw / 2, note_y + 0.2,
+           "All 40 items verified dated Saturday 21 Nov 2026 UTC · Zero Friday leaks",
+           "nar_i", 9.6, "#3C4654", anchor="mm", label="briefs-note")
+
+    end_y = y + 22.0 + (rows - 1) * lh + 7.5
     b.vline(x + colw + col_gap / 2, y + 15, end_y, RULE, 0.7)
     return end_y
 
@@ -537,9 +543,8 @@ def date_check(b, y0, y1):
     if len(lines) > 3:
         raise SystemExit(f"LAYOUT: date check needs {len(lines)} lines (max 3)")
     n_lines = len(lines)
-    lh = 14.5 if n_lines == 2 else (y1 - y0 - 7) / 3
+    lh = 14.8 if n_lines == 2 else (y1 - y0 - 7) / 3
     block_h = (n_lines - 1) * lh
-    # Optically center the 2 or 3 text lines vertically inside the DATE CHECK box
     y_first = (y0 + y1) / 2 - block_h / 2 + 3.4
     draw_wrapped(b, x, y_first, lines, lh, "datecheck", maxw)
 
@@ -554,7 +559,6 @@ def verification_bar(b, y0, y1):
         ("REPORTED", "REPORTED", "= single outlet or NGO"),
         ("CLAIM", "CLAIM", "= one party's unverified account"),
     ]
-    # Measure total width to center horizontally inside the bar
     total_w = b.measure(items[0][0], "sans_k", 7.8) + 8.0
     for idx, (tag, key, desc) in enumerate(items[1:]):
         if idx > 0:
@@ -602,38 +606,38 @@ def build():
     S.validate()
     b = Board()
     tsize = masthead(b)
-    kpi_row(b, 115, 158)
-    region_bar(b, 162, 176)
+    kpi_row(b, 115, 157)
+    region_bar(b, 161, 175)
 
-    # Lead cards 1-3 (unobstructed art + full-width vermilion kicker bar + verification pills)
-    y = 182
+    # Lead cards 1-3 (114px silkscreen art + giant upper-left vermilion ribbon & white sub-pill)
+    y = 181
     lw, gap = 320, (CW - 3 * 320) / 2
     ends = []
     for i, st in enumerate(S.STORIES[:3]):
-        ends.append(card(b, st, M + i * (lw + gap), y, lw, 94, True))
+        ends.append(card(b, st, M + i * (lw + gap), y, lw, 114, True))
     y = max(ends) + 7.0
     b.hline(M, W - M, y, RULE, 0.85)
     y += 6.0
 
-    # Secondary cards 4-13 (2 rows x 5)
+    # Secondary cards 4-13 (2 rows x 5, 70px silkscreen art + giant upper-left vermilion ribbon)
     sw, sgap = 188, (CW - 5 * 188) / 4
     for row in range(2):
         ends = []
         for c in range(5):
             st = S.STORIES[3 + row * 5 + c]
-            ends.append(card(b, st, M + c * (sw + sgap), y, sw, 54, False))
+            ends.append(card(b, st, M + c * (sw + sgap), y, sw, 70, False))
         y = max(ends) + 6.5
         b.hline(M, W - M, y, RULE, 0.85)
         y += 6.0
 
     bottom_top = y
-    map_w, map_h = 334, 172
+    map_w, map_h = 334, 178
     map_end = world_map(b, M, bottom_top, map_w, map_h)
     br_end = briefs(b, M + map_w + 18, bottom_top, CW - map_w - 18)
     b.vline(M + map_w + 9, bottom_top, max(map_end, br_end), RULE, 0.8)
 
     y = max(map_end, br_end) + 6.5
-    dc_h = 47.0
+    dc_h = 46.0
     date_check(b, y, y + dc_h)
     vk_y0 = y + dc_h + 4.5
     vk_y1 = vk_y0 + 16.5

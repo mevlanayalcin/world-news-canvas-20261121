@@ -1,8 +1,10 @@
-"""Story data for the Saturday 21 November 2026 Broadsheet Atlas (v4).
+"""Story data for the Saturday 21 November 2026 Broadsheet Atlas (v5 — 40 verified stories).
 
-Every entry was verified against Saturday 2026-11-21 UTC coverage.
-Zero Friday 20 Nov stories appear anywhere in STORIES or KPIS, and DATE CHECK
-has zero self-contradiction with STORIES 1-39.
+Every entry was verified against Saturday 2026-11-21 UTC coverage, including
+confirmed full-day milestones: BepiColombo entering Mercury orbit (ESA/JAXA)
+and Las Vegas GP qualifying (Verstappen pole after Antonelli 5-place penalty).
+Zero Friday 20 Nov stories appear in STORIES or KPIS, and DATE CHECK has zero
+self-contradiction with STORIES 1-40.
 
 Verification tiers:
   CONFIRMED = corroborated by 2+ independent outlets
@@ -88,23 +90,23 @@ STORIES = [
          headline="Jet lands safely after engine fire alert",
          summary="Air Niugini 767 diverted after midnight; all 146 aboard safe.",
          sources="CAAP, AP"),
-    dict(id=10, region="OCEANIA", beat="Diplomacy", tag="OFFICIAL", utc="2026-11-21T05:15",
-         place="CANBERRA", lat=-35.3, lon=149.1,
-         banner="CANBERRA: AI", chip="Agreed · ABC",
-         headline="Australia and China agree to AI talks",
-         summary="Bilateral safety dialogue agreed as Albanese ends 11-day trip.",
-         sources="ABC News"),
+    dict(id=10, region="GLOBAL", beat="Space", tag="OFFICIAL", utc="2026-11-21T19:01",
+         place="ESA DARMSTADT", lat=49.9, lon=8.6,
+         banner="MERCURY: ORBIT", sub="ESA · JAXA", chip="Confirmed · 8-yr trip",
+         headline="BepiColombo enters orbit around Mercury",
+         summary="MPO and Mio enter Mercury orbit after 8-year trip; split Dec 9–10.",
+         sources="ESA, JAXA, Forbes"),
     dict(id=11, region="GLOBAL", beat="Markets", tag="CONFIRMED", utc="2026-11-21T02:08",
          place="GLOBAL MARKETS", lat=32.0, lon=-40.0,
          banner="BITCOIN: $58,983", chip="CoinGecko · 02:08Z",
          headline="Bitcoin trades below $59,000 on Saturday",
          summary="Down 3.9% in 24 hours to $58,983; ether slides to $1,625.",
          sources="CoinGecko"),
-    dict(id=12, region="AMERICAS", beat="Formula 1", tag="OFFICIAL", utc="2026-11-21T02:35",
+    dict(id=12, region="AMERICAS", beat="Formula 1", tag="CONFIRMED", utc="2026-11-21T06:10",
          place="LAS VEGAS, US", lat=36.1, lon=-115.2,
-         banner="RUSSELL: P1", chip="Timing · Formula 1",
-         headline="Russell fastest in final Las Vegas practice",
-         summary="Clocks 1:34.041 in a damp, messy final GP session.",
+         banner="VEGAS GP: POLE", sub="1:33.893 · F1", chip="Qualifying · F1",
+         headline="Verstappen takes pole after Antonelli penalty",
+         summary="Antonelli tops Q3 in 1:33.893 before 5-place drop; Russell P2.",
          sources="Formula 1"),
     dict(id=13, region="OCEANIA", beat="Cricket", tag="CONFIRMED", utc="2026-11-21T03:45",
          place="WELLINGTON, NZ", lat=-41.3, lon=174.8,
@@ -113,7 +115,7 @@ STORIES = [
          summary="Unbeaten 124* at tea; India 344 for 2 replying to 368.",
          sources="AFP, ESPNcricinfo"),
 
-    # ----------------------------------------------------------- briefs (14-39)
+    # ----------------------------------------------------------- briefs (14-40)
     dict(id=14, region="EUROPE", beat="War", tag="OFFICIAL", utc="2026-11-21T10:55",
          place="Kryvyi Rih", lat=47.9, lon=33.4,
          brief="Double-tap strike kills 2, injures 42", sources="Kyiv Ind."),
@@ -192,6 +194,9 @@ STORIES = [
     dict(id=39, region="AFRICA", beat="Tech", tag="OFFICIAL", utc="2026-11-21T10:37",
          place="Pretoria", lat=-25.7, lon=28.2,
          brief="Ramaphosa sets 90-day national AI deadline", sources="SAnews"),
+    dict(id=40, region="OCEANIA", beat="Diplomacy", tag="OFFICIAL", utc="2026-11-21T05:15",
+         place="Canberra", lat=-35.3, lon=149.1,
+         brief="Australia and China agree to AI talks", sources="ABC"),
 ]
 # fmt: on
 
@@ -206,9 +211,9 @@ KPIS = [
 ]
 
 DECK = ("COP31 climate talks run past deadline  ·  Five Houthi missiles downed over Saudi Arabia  ·  "
-        "M6.7 quake rattles Peru  ·  Bitcoin slips below $59,000")
+        "M6.7 quake rattles Peru  ·  BepiColombo enters Mercury orbit")
 
-# STRICT ZERO-CONTRADICTION DATE CHECK: ONLY true Friday 20 Nov & earlier traps + unconfirmed items.
+# STRICT ZERO-CONTRADICTION DATE CHECK: BepiColombo REMOVED (now confirmed Sat 21 Nov!).
 EXCLUDED_FRIDAY = [
     "Wall\u00a0Street's\u00a0drop\u00a0into\u00a0a\u00a0correction",
     "Russian\u00a0barrage\u00a0hitting\u00a0Kyiv's\u00a0bridges",
@@ -218,8 +223,7 @@ EXCLUDED_FRIDAY = [
     "Voyager\u00a01's\u00a0light-day\u00a0(18\u00a0Nov)",
 ]
 NOT_YET = [
-    "BepiColombo in Mercury orbit (burn 18:24–19:01 UTC, unconfirmed at press time)",
-    "Final COP31 text",
+    "Final COP31 deal text",
     "Las Vegas GP race (Sun 22 Nov UTC)",
 ]
 
@@ -244,14 +248,14 @@ def region_counts():
 
 def validate():
     ids = [s["id"] for s in STORIES]
-    assert ids == list(range(1, 40)), ids
+    assert ids == list(range(1, 41)), ids
     keys = {k for k, _, _ in REGIONS}
     for s in STORIES:
         assert s["region"] in keys, s
         assert s["utc"].startswith("2026-11-21T"), s
         assert s["tag"] in ("CONFIRMED", "OFFICIAL", "REPORTED", "CLAIM"), s
         assert s["sources"], s
-    assert sum(region_counts().values()) == len(STORIES) == 39
+    assert sum(region_counts().values()) == len(STORIES) == 40
     assert all(v > 0 for v in region_counts().values())
     for k in KPIS:
         assert k["figure"] in story_text(story(k["story"])), k
