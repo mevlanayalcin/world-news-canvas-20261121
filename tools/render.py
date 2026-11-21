@@ -196,9 +196,9 @@ def draw_wrapped(board, x, y, lines, lh, label, maxw):
 def masthead(b):
     counts = S.region_counts()
 
-    # Signature Midnight Slate-Indigo prestige folio bar (22:00 UTC edition clock)
+    # Signature Midnight Slate-Indigo prestige folio bar (20:30 UTC edition clock)
     b.rect(M, 8, W - M, 25, fill=FOLIO_BG)
-    bl = b.text(M + 8, 16.7, "GLOBAL DISPATCH · 21 NOV · 22:00 UTC", "sans_k", 8.6, FOLIO_GOLD,
+    bl = b.text(M + 8, 16.7, "GLOBAL DISPATCH · 21 NOV · 20:30 UTC", "sans_k", 8.6, FOLIO_GOLD,
                 anchor="lm", spacing=1.0, label="kicker")
     stats = (f"{len(S.STORIES)} VERIFIED STORIES · {len(counts)} REGIONS · "
              f"EVERY ONE DATED {S.DAY_LABEL.upper()}")
@@ -461,7 +461,7 @@ def world_map(b, x, y, w, h):
 
     # Caption + balanced 2-row 7-region legend (4 + 3)
     cap_y = my + h + 10.0
-    b.text(x, cap_y, "Pins: 1–13 (#11 global)  ·  Dots: briefs (co-located share city)", "sans_b", 7.4,
+    b.text(x, cap_y, "12 mapped lead pins (#11 global market) · Dots: briefs (shared city pins)", "sans_b", 7.1,
            "#3C4654", anchor="lm", label="map-cap")
     ky = cap_y + 13.0
     for row_items in (S.REGIONS[:4], S.REGIONS[4:]):
@@ -508,7 +508,7 @@ def briefs(b, x, y, w):
     b.rect(note_x, note_y - 6.2, note_x + colw, note_y + 6.2, fill=TILE_BG, outline=TILE_BORDER,
            width=0.6, r=2.0)
     b.text(note_x + colw / 2, note_y + 0.2,
-           "40 stories · 7 regions · Saturday 21 Nov 2026 (22:00 UTC edition)",
+           "40 stories · 7 regions · Saturday 21 Nov 2026 (20:30 UTC edition)",
            "nar_i", 9.6, "#3C4654", anchor="mm", label="briefs-note")
 
     end_y = y + 22.0 + (rows - 1) * lh + 7.5

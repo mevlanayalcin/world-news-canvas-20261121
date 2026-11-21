@@ -1,7 +1,8 @@
-"""Story data for the Saturday 21 November 2026 Broadsheet Atlas (v7 — 22:00 UTC edition).
+"""Story data for the Saturday 21 November 2026 Broadsheet Atlas (v8 — 20:30 UTC edition).
 
-All 40 stories audited against Saturday 2026-11-21 UTC coverage (22:00 UTC
-compilation clock, cleanly after BepiColombo's 21:37Z Earth signal acquisition).
+All 40 stories audited against Saturday 2026-11-21 UTC coverage (20:30 UTC
+compilation clock: covers BepiColombo's 19:01Z Mercury burn as OFFICIAL while
+explicitly withholding 21:37Z Earth telemetry lock in DATE CHECK).
 Every CONFIRMED badge cites 2+ independent outlets; every map pin uses exact
 event or dateline coordinates (non-geographic #11 Global Markets unpinned).
 
@@ -89,12 +90,12 @@ STORIES = [
          headline="Jet lands safely after engine fire alert",
          summary="Air Niugini 767 diverted after alert; all 137 passengers and 9 crew safe.",
          sources="CAAP, AP"),
-    dict(id=10, region="GLOBAL", beat="Space", tag="CONFIRMED", utc="2026-11-21T21:37",
+    dict(id=10, region="GLOBAL", beat="Space", tag="OFFICIAL", utc="2026-11-21T19:01",
          place="ESA DARMSTADT", lat=49.9, lon=8.6,
-         banner="MERCURY: ORBIT", sub="ESA · JAXA", chip="Signal · 21:37Z",
-         headline="BepiColombo enters orbit around Mercury",
-         summary="MPO and Mio enter Mercury orbit; signal received 21:37Z after 8-year trip.",
-         sources="ESA, Nature"),
+         banner="MERCURY: BURN", sub="ESA · JAXA", chip="Burn 19:01Z · ESA",
+         headline="BepiColombo executes Mercury orbit burn",
+         summary="MPO & Mio finish 8-yr burn at 19:01Z; signal check due 21:37Z.",
+         sources="ESA, JAXA"),
     dict(id=11, region="GLOBAL", beat="Markets", tag="REPORTED", utc="2026-11-21T02:08",
          place="GLOBAL MARKETS", lat=None, lon=None,
          banner="BITCOIN: $58,983", chip="CoinGecko · Sat 21 Nov",
@@ -210,7 +211,7 @@ KPIS = [
 ]
 
 DECK = ("COP31 climate talks run past deadline  ·  Five Houthi missiles downed over Saudi Arabia  ·  "
-        "M6.7 quake rattles Peru  ·  BepiColombo enters Mercury orbit")
+        "M6.7 quake rattles Peru  ·  BepiColombo executes Mercury burn")
 
 # STRICT ZERO-CONTRADICTION DATE CHECK: ONLY true excluded prior-day stories + unconfirmed items.
 EXCLUDED_FRIDAY = [
@@ -223,6 +224,7 @@ EXCLUDED_FRIDAY = [
 ]
 NOT_YET = [
     "Final COP31 deal text",
+    "BepiColombo Earth telemetry lock (21:37Z)",
     "Las Vegas GP race (Sun 22 Nov 04:00 UTC)",
 ]
 
