@@ -36,16 +36,17 @@ STORIES = [
          "Fossil fuels and adaptation funding split delegates. The presidency announced "
          "a new text, with objections due by 03:00 UTC Sunday.",
          sub="Day 13 · no final pact", chip="23:39 UTC  /  Reuters dispatch"),
-    card("GLOBAL", "UNCONFIRMED", "DARMSTADT, GERMANY", 49.87, 8.62, "mercury", "Mission control",
-         "MERCURY: ORBIT WATCH", "BepiColombo makes its bid for Mercury orbit",
-         "ESA said at 19:01 UTC the burn should have ended. The mission expected a signal "
-         "at 21:37; we could not verify orbital capture by press time.",
-         sub="37 min · planned burn", chip="ESA / JAXA  ·  joined orbiters"),
+    card("MIDEAST", "OFFICIAL", "RIYADH & WEST, SAUDI ARABIA", 24.71, 46.68, "saudi", "War",
+         "SAUDI: MISSILES", "Saudi defences down four Houthi missiles",
+         "Coalition statements in Saturday’s dispatches: three aimed at Riyadh around "
+         "02:00 local time, then one bound for the west by 22:50 UTC. Friday evening’s two "
+         "over Jazan are excluded.",
+         sub="3 Riyadh · 1 west", chip="06:17 & 22:50 UTC  /  Reuters, MEE dispatches"),
     card("AMERICAS", "OFFICIAL", "JUNÍN, PERU", -10.97, -76.19, "andes", "Earthquake",
          "PERU: QUAKE 6.7", "Peru quake leaves 152 homes uninhabitable",
          "Civil defence records one death and 16 injuries nationwide. The M6.7 quake hit "
          "at 00:09 UTC Saturday, still Friday evening in Peru.",
-         sub="129 km deep · Peru's IGP", chip="23:00 UTC  /  INDECI report 6"),
+         sub="129 km deep · Peru’s IGP", chip="23:00 UTC  /  INDECI report 6"),
     card("MIDEAST", "OFFICIAL", "MANAMA, BAHRAIN", 26.23, 50.58, "bahrain", "Gulf",
          "BAHRAIN: FIRE", "Bahrain reports fire at industrial site",
          "Ministry reports damage but no injuries after an Iranian attack.",
@@ -60,7 +61,7 @@ STORIES = [
          chip="West Kordofan  /  relief report"),
     card("MIDEAST", "OFFICIAL", "KHASAB, OMAN", 26.18, 56.25, "tanker", "Shipping",
          "HORMUZ: SHIPPING", "Two tanker incidents off Oman",
-         "UKMTO logged two projectile hits near Khasab. No casualties reported.",
+         "UKMTO logs two projectile hits near Khasab. No casualties reported.",
          chip="Strait of Hormuz  /  UKMTO"),
     card("ASIA", "OFFICIAL", "BHUBANESWAR, INDIA", 20.30, 85.82, "flood", "Weather",
          "AKVAN: AFTERMATH", "Odisha puts rivers on watch after Akvan",
@@ -70,14 +71,14 @@ STORIES = [
          "SINALOA: ARREST", "Mexico confirms capture of ‘El Chapo Isidro’",
          "Fausto Isidro Meza Flores is in custody. Four soldiers died in the operation.",
          chip="Sinaloa  /  defence ministry"),
-    card("GLOBAL", "CONFIRMED", "GENEVA, SWITZERLAND", 46.23, 6.14, "geneva", "Technology",
-         "AI: NO TREATY", "States keep talking on autonomous weapons",
-         "Delegates agreed to work on rules by 2028, not to make them binding.",
-         chip="UN arms conference  /  Geneva"),
+    card("GLOBAL", "UNCONFIRMED", "DARMSTADT, GERMANY", 49.87, 8.62, "mercury", "Mission control",
+         "MERCURY: ORBIT WATCH", "BepiColombo makes its bid for Mercury orbit",
+         "37 min planned burn. Signal expected 21:37 UTC; capture unverified by press time.",
+         chip="ESA / JAXA  ·  burn to 19:01 UTC"),
     card("EUROPE", "CONFIRMED", "NEWCASTLE, ENGLAND", 54.98, -1.62, "football", "Football",
          "ARSENAL: DRAW", "Madueke rescues a point for Arsenal",
          "Newcastle drew 2–2 with the league leaders at St James’ Park.",
-         chip="Full time  /  Newcastle v Arsenal"),
+         chip="Full time  /  St James’ Park"),
     card("AMERICAS", "OFFICIAL", "LAS VEGAS, US", 36.11, -115.16, "vegas", "Formula 1",
          "VEGAS: THE GRID", "Verstappen inherits pole from Antonelli",
          "Antonelli tops Q3 in 1:33.893 but drops five grid places. Russell starts second.",
@@ -86,7 +87,7 @@ STORIES = [
          "INDIA: 486/4", "Rahul hits 136 as India take a 118-run lead",
          "Gill falls for 98 in the last over of Day 3 against New Zealand.",
          chip="Day 3 stumps  /  Basin Reserve"),
-    wire("MIDEAST", "Saudi coalition", "Houthi missiles down: Riyadh 3, west 1"),
+    wire("GLOBAL", "Geneva", "No AI-weapons treaty; states eye rules by 2028"),
     wire("MIDEAST", "Hormuz", "Iran says it downed two US drones", tag="CLAIM"),
     wire("MIDEAST", "Gaza City", "Hospital says strike on food truck killed three"),
     wire("MIDEAST", "Basra", "Fire at Hartha power station spreads to homes"),
@@ -122,19 +123,46 @@ for number, item in enumerate(STORIES, 1):
     credits = dict.fromkeys(r["credit"] for r in EVIDENCE if int(r["id"]) == number)
     item["sources"] = ", ".join(credits)
 
-# Six headline figures; ``story`` names the story whose text must hold ``figure`` verbatim.
+# Six headline figures. ``needs`` lists the phrases the cited story must print verbatim, so a
+# tile can never drift from its card.
 KPIS = [
-    dict(figure="Day 13", story=1, caption=("Antalya’s overtime session;", "no final climate pact adopted")),
-    dict(figure="37 min", story=2, caption=("planned Mercury burn;", "not an orbit confirmation")),
-    dict(figure="152", story=3, caption=("homes uninhabitable in Peru,", "per the 23:00 UTC report")),
-    dict(figure="73", story=5, caption=("injured in Kryvyi Rih,", "including nine children")),
-    dict(figure="$60,086", story=37, caption=("bitcoin on Coinbase at", "the Saturday UTC close")),
-    dict(figure="486/4", story=13, caption=("India at Saturday stumps;", "118 ahead of New Zealand")),
+    dict(figure="Day 13", story=1, needs=("Day 13",),
+         caption=("Antalya’s overtime session;", "no final climate pact adopted")),
+    dict(figure="4", story=2, needs=("four Houthi missiles", "3 Riyadh", "1 west"),
+         caption=("Houthi missiles downed in", "Sat. reports: 3 Riyadh, 1 west")),
+    dict(figure="152", story=3, needs=("152 homes uninhabitable",),
+         caption=("homes uninhabitable in Peru,", "per the 23:00 UTC report")),
+    dict(figure="73", story=5, needs=("73 injured", "nine of them children"),
+         caption=("injured in Kryvyi Rih,", "including nine children")),
+    dict(figure="$60,086", story=37, needs=("$60,086",),
+         caption=("bitcoin on Coinbase at", "the Saturday UTC close")),
+    dict(figure="486/4", story=13, needs=("486/4", "118-run lead", "Day 3"),
+         caption=("India at Day 3 stumps;", "118-run lead over NZ")),
 ]
 
-DECK = ("A draft, not a deal, in Antalya  ·  Listening for BepiColombo  ·  "
-        "Peru counts the cost of an Andean quake  ·  Bahrain reports an industrial fire")
+DECK = ("A draft, not a deal, in Antalya  ·  Saudi defences down four Houthi missiles  ·  "
+        "Peru counts the cost of an Andean quake  ·  Listening for BepiColombo")
 FOOTBALL_FT = ("Man City 1–1 Fulham", "Chelsea 1–4 Leeds")
+
+# The date check. Each excluded item carries the UTC date it belongs to; each pending item the
+# instant it was due, or None where no time was set. README.md links the reports.
+EXCLUDED_LABEL = "Excluded (Fri 20 Nov & earlier):"
+EXCLUDED = [
+    ("Wall Street’s drop into a correction", date(2026, 11, 20)),
+    ("Russian barrage on Kyiv’s bridges", date(2026, 11, 20)),
+    ("Jazan’s two missile interceptions", date(2026, 11, 20)),
+    ("Missile landing in Poland", date(2026, 11, 20)),
+    ("UK–EU reset deal", date(2026, 11, 20)),
+    ("Cyclone Akvan’s landfall", date(2026, 11, 20)),
+    ("Voyager 1’s light-day (18 Nov)", date(2026, 11, 18)),
+]
+PENDING_LABEL = f"Pending at {CLOCK} close:"
+PENDING = [
+    ("BepiColombo Mercury orbit capture (21:37 UTC expected signal unverified by press time)", None),
+    ("Final COP31 pact adoption", None),
+    ("Las Vegas GP race (Sun 22 Nov 04:00 UTC)", datetime(2026, 11, 22, 4, 0, tzinfo=timezone.utc)),
+    ("Boca Juniors 2–0 still live", None),
+]
 
 
 def story(sid):
@@ -180,5 +208,10 @@ def validate():
     assert sum(region_counts().values()) == len(STORIES)
     assert all(v > 0 for v in region_counts().values())
     for k in KPIS:
-        assert k["figure"] in story_text(story(k["story"])), k
+        text = story_text(story(k["story"]))
+        assert all(phrase in text for phrase in k["needs"]), k
+    lead_13 = story(13)
+    assert "118-run lead" in " ".join(KPIS[5]["caption"]) and "118-run lead" in lead_13["headline"]
+    assert all(day < DAY for _, day in EXCLUDED)
+    assert all(due is None or due > CLOSE for _, due in PENDING)
     return True
