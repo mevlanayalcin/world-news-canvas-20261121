@@ -1,11 +1,13 @@
-"""Copy and dateline locators for the full 24-hour edition. Evidence: SOURCES.tsv."""
+"""Copy and dateline locators for the full 24-hour Saturday UTC edition. Evidence: SOURCES.tsv."""
 import csv
 from datetime import date, datetime, time, timezone
 from pathlib import Path
 
 DAY = date(2026, 11, 21)
+OPEN = datetime.combine(DAY, time(0, 0), timezone.utc)
 CLOSE = datetime.combine(DAY, time(23, 59, 59), timezone.utc)
 CLOCK = CLOSE.strftime("%H:%M UTC")
+WINDOW = f"{OPEN:%H:%M}–{CLOSE:%H:%M} UTC"
 DAY_LABEL = DAY.strftime("%A %d %B %Y")
 LEADS = 13
 
@@ -19,6 +21,12 @@ REGIONS = [
     ("OCEANIA", "OCEANIA", "#186F7A"),
     ("GLOBAL", "GLOBAL", "#5F4486"),
 ]
+TAGS = ("CONFIRMED", "OFFICIAL", "REPORTED", "CLAIM", "UNCONFIRMED")
+
+DECK = (
+    "A new draft in Antalya  ·  Two tankers struck in Hormuz  ·  "
+    "Peru counts an Andean quake  ·  Waiting on BepiColombo"
+)
 
 
 def card(region, tag, place, lat, lon, scene, beat, banner, headline, summary, *, sub="", chip=""):
@@ -36,12 +44,11 @@ STORIES = [
          "Fossil fuels and adaptation funding split delegates. The presidency announced "
          "a new text, with objections due by 03:00 UTC Sunday.",
          sub="Day 13 · no final pact", chip="23:39 UTC  /  Reuters dispatch"),
-    card("MIDEAST", "OFFICIAL", "RIYADH & WEST, SAUDI ARABIA", 24.71, 46.68, "saudi", "War",
-         "SAUDI: MISSILES", "Saudi defences down four Houthi missiles",
-         "Coalition statements in Saturday’s dispatches: three aimed at Riyadh around "
-         "02:00 local time, then one bound for the west by 22:50 UTC. Friday evening’s two "
-         "over Jazan are excluded.",
-         sub="3 Riyadh · 1 west", chip="06:17 & 22:50 UTC  /  Reuters, MEE dispatches"),
+    card("MIDEAST", "OFFICIAL", "KHASAB, OMAN", 26.18, 56.25, "hormuz", "Shipping",
+         "HORMUZ: TANKERS HIT", "Two tanker strikes reported in Strait of Hormuz",
+         "UKMTO logged projectile hits on vessels 11 nm north and 17 nm east "
+         "of Khasab. No casualties were reported and no attacker was named.",
+         sub="05:00 & 05:50 UTC", chip="UKMTO warnings 215-26, 216-26"),
     card("AMERICAS", "OFFICIAL", "JUNÍN, PERU", -10.97, -76.19, "andes", "Earthquake",
          "PERU: QUAKE 6.7", "Peru quake leaves 152 homes uninhabitable",
          "Civil defence records one death and 16 injuries nationwide. The M6.7 quake hit "
@@ -49,119 +56,128 @@ STORIES = [
          sub="129 km deep · Peru’s IGP", chip="23:00 UTC  /  INDECI report 6"),
     card("MIDEAST", "OFFICIAL", "MANAMA, BAHRAIN", 26.23, 50.58, "bahrain", "Gulf",
          "BAHRAIN: FIRE", "Bahrain reports fire at industrial site",
-         "Ministry reports damage but no injuries after an Iranian attack.",
-         chip="Interior ministry  /  Manama"),
-    card("EUROPE", "OFFICIAL", "KRYVYI RIH, UKRAINE", 47.91, 33.39, "ukraine", "Ukraine",
-         "UKRAINE: 73 HURT", "Two killed in strikes on Kryvyi Rih",
-         "City chief counts 73 injured, nine of them children, after Russian strikes.",
-         chip="20:02 UTC  /  city toll"),
-    card("AFRICA", "REPORTED", "ABU ZABAD AREA, SUDAN", 12.35, 29.25, "kordofan", "Sudan",
-         "SUDAN: CIVILIANS", "Relief group accuses RSF of killing civilians",
-         "Dar Hamar committee reports women and children killed on Friday.",
-         chip="West Kordofan  /  relief report"),
-    card("MIDEAST", "OFFICIAL", "KHASAB, OMAN", 26.18, 56.25, "tanker", "Shipping",
-         "HORMUZ: SHIPPING", "Two tanker incidents off Oman",
-         "UKMTO logs two projectile hits near Khasab. No casualties reported.",
-         chip="Strait of Hormuz  /  UKMTO"),
+         "Ministry blames an Iranian attack; no injuries reported.",
+         chip="21:30 UTC  /  Interior Min."),
+    card("EUROPE", "CONFIRMED", "GULF OF FINLAND", 60.0, 26.2, "baltic", "Baltic",
+         "BALTIC: SHIP ABLAZE", "Drone strike sets Russian cargo ship ablaze",
+         "Crew of 16 leaves the Sparta II; Finland suspects Ukraine.",
+         chip="06:50 UTC  /  Border Guard"),
+    card("AFRICA", "OFFICIAL", "PRAIA, CABO VERDE", 14.93, -23.51, "caboverde", "Election",
+         "CABO VERDE: VOTE", "Neves declared re-elected president",
+         "Final count of the 15 Nov vote gives him 63.96%.",
+         chip="CNE proclamation  /  Sat"),
+    card("AMERICAS", "CONFIRMED", "GUASAVE, MEXICO", 25.57, -108.47, "sinaloa", "Security",
+         "SINALOA: ARREST", "Mexico captures cartel boss ‘El Chapo Isidro’",
+         "Four soldiers and seven gunmen died in the raid.",
+         chip="Saturday confirmation"),
     card("ASIA", "OFFICIAL", "BHUBANESWAR, INDIA", 20.30, 85.82, "flood", "Weather",
          "AKVAN: AFTERMATH", "Odisha puts rivers on watch after Akvan",
-         "State orders round-the-clock checks on rivers and reservoirs after heavy rain.",
-         chip="Cyclone aftermath  /  Odisha"),
-    card("AMERICAS", "CONFIRMED", "GUASAVE, MEXICO", 25.57, -108.47, "sinaloa", "Justice",
-         "SINALOA: ARREST", "Mexico confirms capture of ‘El Chapo Isidro’",
-         "Fausto Isidro Meza Flores is in custody. Four soldiers died in the operation.",
-         chip="Sinaloa  /  defence ministry"),
+         "Round-the-clock checks on rivers and reservoirs.",
+         chip="08:06 UTC  /  Sat order"),
+    card("ASIA", "OFFICIAL", "BANDA SEA", -7.73, 127.54, "bandasea", "Earthquake",
+         "BANDA SEA: QUAKE 6.8", "Deep quake off Timor-Leste rattles Darwin",
+         "Struck 132 km deep, north-east of Lospalos.",
+         chip="09:42 UTC  /  USGS"),
     card("GLOBAL", "UNCONFIRMED", "DARMSTADT, GERMANY", 49.87, 8.62, "mercury", "Mission control",
          "MERCURY: ORBIT WATCH", "BepiColombo makes its bid for Mercury orbit",
-         "37 min planned burn. Signal expected 21:37 UTC; capture unverified by press time.",
-         chip="ESA / JAXA  ·  burn to 19:01 UTC"),
+         "Signal due 21:37 UTC; capture unverified at close.",
+         chip="18:24–19:01 UTC burn"),
     card("EUROPE", "CONFIRMED", "NEWCASTLE, ENGLAND", 54.98, -1.62, "football", "Football",
          "ARSENAL: DRAW", "Madueke rescues a point for Arsenal",
-         "Newcastle drew 2–2 with the league leaders at St James’ Park.",
+         "Newcastle held league leaders 2–2 at St James’.",
          chip="Full time  /  St James’ Park"),
     card("AMERICAS", "OFFICIAL", "LAS VEGAS, US", 36.11, -115.16, "vegas", "Formula 1",
          "VEGAS: THE GRID", "Verstappen inherits pole from Antonelli",
-         "Antonelli tops Q3 in 1:33.893 but drops five grid places. Russell starts second.",
+         "Antonelli tops Q3 in 1:33.893; drops five places.",
          chip="Qualifying  /  not the race"),
     card("OCEANIA", "CONFIRMED", "WELLINGTON, NZ", -41.30, 174.78, "cricket", "Cricket",
          "INDIA: 486/4", "Rahul hits 136 as India take a 118-run lead",
-         "Gill falls for 98 in the last over of Day 3 against New Zealand.",
+         "Gill falls for 98 in the last over of Day 3.",
          chip="Day 3 stumps  /  Basin Reserve"),
-    wire("GLOBAL", "Geneva", "No AI-weapons treaty; states eye rules by 2028"),
+    wire("GLOBAL", "Geneva", "No killer-robot treaty; talks run to 2028"),
     wire("MIDEAST", "Hormuz", "Iran says it downed two US drones", tag="CLAIM"),
-    wire("MIDEAST", "Gaza City", "Hospital says strike on food truck killed three"),
-    wire("MIDEAST", "Basra", "Fire at Hartha power station spreads to homes"),
-    wire("MIDEAST", "Tehran", "Minister says enriched uranium must stay in Iran"),
+    wire("MIDEAST", "Gaza City", "Strike on a food truck kills three"),
+    wire("MIDEAST", "Basra", "Power-plant gas blast kills four", tag="REPORTED"),
     wire("EUROPE", "Kyiv", "Zelensky defends Crimean Bridge strikes"),
-    wire("EUROPE", "Gulf of Finland", "Crew of 16 leaves burning Sparta II"),
-    wire("EUROPE", "Paris", "Ministry counts 21,500 in cost-of-living march"),
-    wire("AFRICA", "Bayelsa", "Governor orders inquiry into funeral boat sinking"),
-    wire("AFRICA", "Abuja", "CAF reports $31.2m net profit at assembly"),
-    wire("AFRICA", "Pretoria", "State funeral set for Phumzile Mlambo-Ngcuka"),
-    wire("AMERICAS", "Brasília", "Hospital says Bolsonaro is stable in intensive care"),
-    wire("AMERICAS", "Florida", "Flagler limits traffic to 5 mph on flooded roads"),
-    wire("ASIA", "Davao", "Air Niugini diversion: all 146 aboard accounted for"),
-    wire("ASIA", "Banda Sea", "M6.8 quake off Timor-Leste felt in Darwin"),
-    wire("ASIA", "Sejong", "Korail restores service after freight derailment"),
-    wire("ASIA", "Manipur", "Six arrested over suspected tainted liquor deaths"),
-    wire("ASIA", "Bangkok", "Thailand seeks curbs on mining chemical exports"),
-    wire("ASIA", "New Delhi", "Ministry reports progress in Canada trade talks"),
-    wire("ASIA", "Cox’s Bazar", "Rohingya welcome ruling but seek safe return"),
-    wire("OCEANIA", "Sydney", "Families rally over homebirth insurance rules"),
-    wire("OCEANIA", "Melbourne", "Cricket Australia backs Cummins as captain"),
-    wire("ASIA", "Qinghai", "M5.6 earthquake strikes Delingha, CENC says"),
-    wire("GLOBAL", "Bitcoin", "BTC/USD closes at $60,086 after a $55,106 low"),
-    wire("EUROPE", "Turin", "Zverev and Alcaraz win ATP Finals semifinals"),
-    wire("EUROPE", "Saint-Denis", "France beat Argentina 45–17 to reach rugby final"),
-    wire("AMERICAS", "Barranquilla", "Boca lead Atlético Mineiro 2–0 at cutoff"),
+    wire("EUROPE", "Paris", "21,500 join cost-of-living march"),
+    wire("EUROPE", "Brussels", "EU and Indonesia sign trade pact"),
+    wire("AFRICA", "Abuja", "CAF posts a $31.2m net profit"),
+    wire("AFRICA", "Pretoria", "State funeral set for Mlambo-Ngcuka"),
+    wire("AFRICA", "Johannesburg", "Marchers lie down over femicide"),
+    wire("AFRICA", "Ibadan", "Tinubu rally mourns boat victims"),
+    wire("AMERICAS", "Brasília", "Bolsonaro stable in intensive care"),
+    wire("AMERICAS", "Florida", "Flagler caps flooded roads at 5 mph"),
+    wire("AMERICAS", "Brazil", "Bred mosquitoes cut dengue by 69%"),
+    wire("ASIA", "Manipur", "Six held; toxic liquor toll at 16"),
+    wire("ASIA", "Bangkok", "Rare-earth chemical curbs planned"),
+    wire("ASIA", "Hanoi", "Assembly passes revised Land Law"),
+    wire("ASIA", "Qinghai", "M5.6 earthquake strikes Delingha"),
+    wire("OCEANIA", "Sydney", "Families rally over homebirth rules"),
+    wire("OCEANIA", "Melbourne", "Board backs Cummins as Test captain"),
+    wire("GLOBAL", "Bitcoin", "Ends at $60,086 after $55,106 low"),
+    wire("EUROPE", "Turin", "Zverev, Alcaraz win ATP Finals semis"),
+    wire("EUROPE", "Saint-Denis", "France beat Argentina 45–17"),
+    wire("AMERICAS", "Barranquilla", "Boca lead Mineiro 2–0 at cutoff"),
 ]
 
 with (Path(__file__).resolve().parents[1] / "SOURCES.tsv").open(encoding="utf-8") as fh:
     EVIDENCE = list(csv.DictReader(fh, delimiter="\t"))
 for number, item in enumerate(STORIES, 1):
     item["id"] = number
-    credits = dict.fromkeys(r["credit"] for r in EVIDENCE if int(r["id"]) == number)
-    item["sources"] = ", ".join(credits)
+    credits = list(dict.fromkeys(r["credit"] for r in EVIDENCE if int(r["id"]) == number))
+    # Cards print every credit; a wire line has room for its first one only.
+    item["sources"] = ", ".join(credits if "headline" in item else credits[:1])
 
-# Six headline figures. ``needs`` lists the phrases the cited story must print verbatim, so a
-# tile can never drift from its card.
-KPIS = [
-    dict(figure="Day 13", story=1, needs=("Day 13",),
-         caption=("Antalya’s overtime session;", "no final climate pact adopted")),
-    dict(figure="4", story=2, needs=("four Houthi missiles", "3 Riyadh", "1 west"),
-         caption=("Houthi missiles downed in", "Sat. reports: 3 Riyadh, 1 west")),
-    dict(figure="152", story=3, needs=("152 homes uninhabitable",),
-         caption=("homes uninhabitable in Peru,", "per the 23:00 UTC report")),
-    dict(figure="73", story=5, needs=("73 injured", "nine of them children"),
-         caption=("injured in Kryvyi Rih,", "including nine children")),
-    dict(figure="$60,086", story=37, needs=("$60,086",),
-         caption=("bitcoin on Coinbase at", "the Saturday UTC close")),
-    dict(figure="486/4", story=13, needs=("486/4", "118-run lead", "Day 3"),
-         caption=("India at Day 3 stumps;", "118-run lead over NZ")),
+# The day in UTC. Each entry names a lead card and a minute that SOURCES.tsv documents for it,
+# so a timestamp on the chronological strip can never drift from the evidence ledger.
+TIMELINE = [
+    (3, "00:09", "Peru M6.7 quake"),
+    (2, "05:00", "Hormuz hits"),
+    (5, "06:50", "Baltic ship alert"),
+    (9, "09:42", "Banda Sea M6.8"),
+    (10, "18:24", "Mercury burn"),
+    (3, "23:00", "Peru toll (rep. 6)"),
+    (1, "23:39", "COP31 draft"),
 ]
 
-DECK = ("A draft, not a deal, in Antalya  ·  Saudi defences down four Houthi missiles  ·  "
-        "Peru counts the cost of an Andean quake  ·  Listening for BepiColombo")
-FOOTBALL_FT = ("Man City 1–1 Fulham", "Chelsea 1–4 Leeds")
+# Six reconciled headline figures: every phrase in ``needs`` is verified against its named story.
+KPIS = [
+    dict(story=1, figure="Day 13", caption=("COP31 overtime;", "no final pact adopted"),
+         needs=("Day 13", "no final pact")),
+    dict(story=2, figure="2 tankers", caption=("struck off Khasab,", "per UKMTO warnings"),
+         needs=("Two tanker strikes", "Khasab")),
+    dict(story=3, figure="152", caption=("homes uninhabitable,", "Peru 23:00 UTC toll"),
+         needs=("152 homes uninhabitable",)),
+    dict(story=5, figure="16 crew", caption=("leave burning Sparta II", "in Gulf of Finland"),
+         needs=("16", "Sparta II")),
+    dict(story=34, figure="$60,086", caption=("Bitcoin Coinbase close", "after $55,106 Sat low"),
+         needs=("$60,086", "$55,106")),
+    dict(story=13, figure="486/4", caption=("India Day 3 stumps;", "118-run lead over NZ"),
+         needs=("486/4", "118-run lead")),
+]
 
-# The date check. Each excluded item carries the UTC date it belongs to; each pending item the
-# instant it was due, or None where no time was set. README.md links the reports.
-EXCLUDED_LABEL = "Excluded (Fri 20 Nov & earlier):"
+FOOTBALL_FT = ["Man City 1–1 Fulham", "Chelsea 1–4 Leeds", "Newcastle 2–2 Arsenal (#11)"]
+
+# The date check. Each excluded item carries the UTC date or instant it belongs to; each pending
+# item the instant it was due, or None where no time was set. README.md links the reports.
+EXCLUDED_LABEL = ("EXCLUDED", "Fri 20 Nov UTC & earlier")
 EXCLUDED = [
-    ("Wall Street’s drop into a correction", date(2026, 11, 20)),
-    ("Russian barrage on Kyiv’s bridges", date(2026, 11, 20)),
-    ("Jazan’s two missile interceptions", date(2026, 11, 20)),
+    ("Houthi missiles over Riyadh (22:53 UTC Fri) & Jazan",
+     datetime(2026, 11, 20, 22, 53, tzinfo=timezone.utc)),
+    ("Kryvyi Rih missile strike", date(2026, 11, 20)),
+    ("Wall Street correction", date(2026, 11, 20)),
+    ("Russian barrage on Kyiv bridges", date(2026, 11, 20)),
     ("Missile landing in Poland", date(2026, 11, 20)),
     ("UK–EU reset deal", date(2026, 11, 20)),
-    ("Cyclone Akvan’s landfall", date(2026, 11, 20)),
-    ("Voyager 1’s light-day (18 Nov)", date(2026, 11, 18)),
+    ("Cyclone Akvan landfall", date(2026, 11, 20)),
+    ("Voyager 1 light-day (18 Nov)", date(2026, 11, 18)),
 ]
-PENDING_LABEL = f"Pending at {CLOCK} close:"
+PENDING_LABEL = ("PENDING", f"at {CLOCK} close")
 PENDING = [
-    ("BepiColombo Mercury orbit capture (21:37 UTC expected signal unverified by press time)", None),
-    ("Final COP31 pact adoption", None),
-    ("Las Vegas GP race (Sun 22 Nov 04:00 UTC)", datetime(2026, 11, 22, 4, 0, tzinfo=timezone.utc)),
-    ("Boca Juniors 2–0 still live", None),
+    ("BepiColombo orbit capture (21:37 UTC expected signal unverified at press time)", None),
+    ("Final COP31 pact", None),
+    ("Las Vegas GP race (Sun 22 Nov, 04:00 UTC)", datetime(2026, 11, 22, 4, 0, tzinfo=timezone.utc)),
+    ("Boca–Mineiro result (2–0, still in play)", None),
 ]
 
 
@@ -173,7 +189,7 @@ def story(sid):
 
 
 def story_text(s):
-    return " ".join(str(s.get(k, "")) for k in ("headline", "summary", "brief", "banner", "sub"))
+    return " ".join(str(s.get(k, "")) for k in ("headline", "summary", "brief", "banner", "sub", "chip"))
 
 
 def region_counts():
@@ -181,6 +197,12 @@ def region_counts():
     for s in STORIES:
         counts[s["region"]] += 1
     return counts
+
+
+def instants(sid):
+    """UTC instants that SOURCES.tsv documents for one story."""
+    return [datetime.fromisoformat(r["utc"].replace("Z", "+00:00"))
+            for r in EVIDENCE if int(r["id"]) == sid and r["utc"].endswith("Z")]
 
 
 def validate():
@@ -193,25 +215,37 @@ def validate():
         else:
             assert stamp.endswith("Z"), r
             instant = datetime.fromisoformat(stamp.replace("Z", "+00:00"))
-            assert instant.date() == DAY and instant <= CLOSE, r
+            assert OPEN <= instant <= CLOSE, r
         assert r["credit"] and r["url"].startswith("https://") and r["peg"], r
     keys = {k for k, _, _ in REGIONS}
     for s in STORIES:
         assert s["region"] in keys and s["sources"], s
         if s["id"] <= LEADS:
             assert -90 <= s["lat"] <= 90 and -180 <= s["lon"] <= 180, s
-            assert s["tag"] in ("CONFIRMED", "OFFICIAL", "REPORTED", "UNCONFIRMED"), s
+            assert s["tag"] in TAGS and s["chip"], s
             if s["tag"] == "CONFIRMED":
                 assert len({r["credit"] for r in EVIDENCE if int(r["id"]) == s["id"]}) >= 2, s
         else:
-            assert s["brief"], s
+            assert s["brief"] and s["tag"] in (None,) + TAGS, s
+    assert {s["tag"] for s in STORIES if s["tag"]} == set(TAGS)  # the key explains tags in use
     assert sum(region_counts().values()) == len(STORIES)
     assert all(v > 0 for v in region_counts().values())
+    assert sum(s["region"] == "AFRICA" for s in STORIES[:LEADS]) >= 1
+
     for k in KPIS:
         text = story_text(story(k["story"]))
         assert all(phrase in text for phrase in k["needs"]), k
     lead_13 = story(13)
     assert "118-run lead" in " ".join(KPIS[5]["caption"]) and "118-run lead" in lead_13["headline"]
-    assert all(day < DAY for _, day in EXCLUDED)
+
+    minutes = [f"{hhmm}" for _, hhmm, _ in TIMELINE]
+    assert minutes == sorted(minutes), "timeline must run in UTC order"
+    for sid, hhmm, label in TIMELINE:
+        assert sid <= LEADS and label, (sid, label)
+        assert any(f"{t:%H:%M}" == hhmm for t in instants(sid)), (sid, hhmm)
+
+    for _, when in EXCLUDED:
+        assert (when.date() if isinstance(when, datetime) else when) < DAY
+        assert not isinstance(when, datetime) or when < OPEN
     assert all(due is None or due > CLOSE for _, due in PENDING)
     return True

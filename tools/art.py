@@ -252,64 +252,57 @@ def scene_cop31(p):
     p.line([(x + 24, y + 46.5), (x + 46, y + 43.5)], "#AF392F", 1.5)
 
 
-def scene_saudi(p):
-    """Four interceptions in two coalition accounts: three over Riyadh, one bound for the west."""
+def scene_hormuz_hero(p):
+    """Strait of Hormuz: two outbound tankers off Khasab with an archival compass rose."""
     w, h, g = p.w, p.h, p.base
-    p.vgrad(0, h, "#0A1730", "#27436F")
-    stars(p, 84, 29, y1=g * 0.86)
-    p.glow(w * 0.74, g + 8, 104, "#F0B954", 78)
+    sea = g * 0.56
+    p.vgrad(0, sea, "#E7B482", "#FAF0DC")
+    p.glow(w * 0.68, sea * 0.85, h * 0.58, "#FFE3A6", 115)
 
-    # The west is open country: a bare ridge, no skyline.
-    hill = [(-4, h)]
-    for i in range(41):
-        x = w * 0.50 * i / 40
-        hill.append((x, g - 7.5 - 5.5 * math.sin(i / 40 * 3.1416) - 2.4 * math.sin(i * 0.55 + 0.6)))
-    p.poly(hill + [(w * 0.50, h)], "#0E1B33")
-    p.rect(0, g - 2, w, h, "#0E1B33")
+    # Layered Musandam / Khasab headlands behind the strait.
+    ridge(p, sea - 10.5, h * 0.11, 1.4, 0.4, "#BA8D66", y_floor=sea + 2)
+    ridge(p, sea - 3.8, h * 0.07, 2.2, 1.6, "#8E6346", y_floor=sea + 2)
+    waves(p, sea, h, "#2B7A96", "#15455C", n=5, seed=15)
 
-    # Riyadh's skyline fills the right-hand half.
-    for x, bw, bh in ((0.505, 16, 15), (0.555, 13, 23), (0.60, 15, 18), (0.715, 15, 25),
-                      (0.845, 15, 28), (0.895, 16, 20), (0.948, 15, 26)):
-        x *= w
-        p.rect(x, g - bh, x + bw, h, "#16294A", "#3A5A8C", 0.55)
-        for row in range(int(bh // 6)):
-            for col in range(int(bw // 5)):
-                if (row * 3 + col * 5 + int(x)) % 4:
-                    p.rect(x + 2.6 + col * 4.6, g - bh + 3.2 + row * 5.6,
-                           x + 4.6 + col * 4.6, g - bh + 5.6 + row * 5.6, "#F4C35A")
-    kx, kh = w * 0.672, 50.0  # Kingdom Centre and its open crown
-    p.poly([(kx - 10.5, h), (kx - 9, g - kh), (kx + 9, g - kh), (kx + 10.5, h)], "#1F3761", "#7C9ED1", 0.8)
-    p.poly([(kx - 5.4, g - kh + 1.2), (kx + 5.4, g - kh + 1.2), (kx + 3.6, g - kh + 14),
-            (kx, g - kh + 18), (kx - 3.6, g - kh + 14)], "#132748")
-    p.line([(kx - 7.2, g - kh + 2), (kx + 7.2, g - kh + 2)], "#FFE59E", 1.2)
-    for row in range(5):
-        for dxw in (-6, -2, 2, 5):
-            p.rect(kx + dxw, g - kh + 22 + row * 5.4, kx + dxw + 1.8, g - kh + 24.2 + row * 5.4, "#F9D06B")
-    fx, fh = w * 0.795, 43.0  # Al Faisaliah's spire and golden orb
-    p.poly([(fx - 11, h), (fx, g - fh), (fx + 11, h)], "#1B3157", "#7C9ED1", 0.8)
-    p.line([(fx, g - fh), (fx, g - fh - 6.5)], "#B0CBF0", 1.0)
-    p.circle(fx, g - fh + 9.5, 3.7, "#F8C846", "#FFF2B2", 0.6)
+    # Distant outbound tanker (right-center) with alert beacon rings.
+    tx2, ty2 = w * 0.65, sea + (g - sea) * 0.34
+    p.line([(tx2 - 34, ty2 + 3.2), (tx2 - 14, ty2 + 3.2)], rgb("#D8F1F8", 145), 0.7)
+    p.poly([(tx2 - 22, ty2 - 2.5), (tx2 + 21, ty2 - 2.5), (tx2 + 26, ty2 - 5.5),
+            (tx2 + 20, ty2 + 3.2), (tx2 - 21, ty2 + 3.2)], "#6F2829")
+    p.rect(tx2 - 21, ty2 - 4.2, tx2 + 19, ty2 - 2.4, "#3B434E")
+    p.rect(tx2 - 21, ty2 - 10.5, tx2 - 13, ty2 - 4.2, "#F6F2E9", "#7C756A", 0.35)
+    p.rect(tx2 - 19, ty2 - 13.5, tx2 - 16, ty2 - 10.5, "#B0322E")
+    for k in range(3):
+        p.circle(tx2 - 8 + k * 8.5, ty2 - 5.0, 1.8, "#58626E")
+    for rr, al in ((9.5, 195), (15.0, 130)):
+        p.arc(tx2 + 4, ty2 - 4, rr, 200, 340, rgb("#D43D2C", al), 1.05)
+
+    # Foreground outbound tanker (lower-left, clear of the ribbon and sub-tag).
+    tx1, ty1 = w * 0.30, g - 10.5
+    p.line([(tx1 - 54, ty1 + 4.8), (tx1 - 30, ty1 + 4.8)], rgb("#D8F1F8", 160), 0.9)
+    p.poly([(tx1 - 36, ty1 - 3.8), (tx1 + 31, ty1 - 3.8), (tx1 + 38, ty1 - 8.2),
+            (tx1 + 29, ty1 + 4.8), (tx1 - 34, ty1 + 4.8)], "#862B28")
+    p.rect(tx1 - 34, ty1 - 6.2, tx1 + 28, ty1 - 3.8, "#38414C")
+    p.rect(tx1 - 34, ty1 - 15.2, tx1 - 22, ty1 - 6.2, "#F7F3EA", "#6F685E", 0.4)
+    p.rect(tx1 - 31, ty1 - 19.2, tx1 - 27, ty1 - 15.2, "#1F4A6E")
     for k in range(4):
-        yy = g - 5 - k * 7
-        half = 8.2 - k * 1.6
-        p.line([(fx - half, yy), (fx + half, yy)], rgb("#F8D374", 190), 0.85)
+        p.circle(tx1 - 15 + k * 10.5, ty1 - 7.3, 2.3, "#5B6572")
+    for rr, al in ((11.0, 205), (17.5, 135)):
+        p.arc(tx1 + 8, ty1 - 6, rr, 205, 335, rgb("#D43D2C", al), 1.15)
 
-    # (burst, launch point, radius): three over the capital, one apart over the western ridge.
-    shots = (
-        ((w * 0.585, g * 0.345), (w * 0.535, g - 16), 10.0),
-        ((w * 0.745, g * 0.205), (w * 0.700, g - 26), 11.0),
-        ((w * 0.905, g * 0.335), (w * 0.870, g - 29), 10.0),
-        ((w * 0.335, g * 0.735), (w * 0.215, g - 11), 9.0),
-    )
-    for (bx, by), (lx, ly), br in shots:
-        sx, sy = bx + 25, by - 43  # each warhead falls steeply, so no two trails read as one
-        for k in range(0, 7, 2):
-            t0, t1 = k / 7, (k + 1.2) / 7
-            p.line([(sx + (bx - sx) * t0, sy + (by - sy) * t0),
-                    (sx + (bx - sx) * t1, sy + (by - sy) * t1)], "#FF8A4C", 1.35)
-        p.line([(lx, ly), (bx, by)], rgb("#8EE3FF", 205), 1.15)
-        p.glow(bx, by, br * 1.9, "#FF9E2C", 175, steps=12)
-        starburst(p, bx, by, br, br * 0.40, "#FFB338", "#FFF9D6")
+    # Archival nautical compass rose in the clear upper-right sky (no blame implied).
+    cx, cy, cr = w * 0.895, 29.0, 18.5
+    p.circle(cx, cy, cr, "#FAF2E1", "#6D5E4C", 0.95)
+    p.circle(cx, cy, cr - 2.6, None, "#C8B89E", 0.5)
+    for angle in range(0, 360, 30):
+        a = math.radians(angle)
+        inner = cr - (4.4 if angle % 90 == 0 else 2.6)
+        p.line([(cx + inner * math.sin(a), cy - inner * math.cos(a)),
+                (cx + (cr - 0.8) * math.sin(a), cy - (cr - 0.8) * math.cos(a))], "#6B6156", 0.75)
+    p.poly([(cx - 3.8, cy), (cx, cy - 12.6), (cx + 3.8, cy)], "#B22222")
+    p.poly([(cx - 3.8, cy), (cx, cy + 12.6), (cx + 3.8, cy)], "#1F4A6E")
+    p.circle(cx, cy, 2.2, "#F0C66E", "#4A3E30", 0.5)
+    p.text(cx, cy - cr - 3.8, "N", 6.8, "#5A4634")
 
 
 def scene_peru_hero(p):
@@ -352,31 +345,91 @@ def scene_peru_hero(p):
     p.text(w * 0.66 + 28, sy0 + 11.4, "M 6.7", 10.6, "#FFFFFF")
 
 
-def scene_tanker(p):
+def scene_baltic(p):
+    """Gulf of Finland: Sparta II burning at sea with a rescue lifeboat pulling clear."""
     w, h, g = p.w, p.h, p.base
-    sea = g * 0.52
-    p.vgrad(0, sea, "#EBC092", "#F8E7CE")
-    p.poly([(0, sea - 11), (w * 0.28, sea - 7), (w * 0.58, sea - 11), (w, sea - 7),
-            (w, sea + 2), (0, sea + 2)], "#B88E68")
-    waves(p, sea, h, "#30829C", "#184E66", n=5, seed=15)
+    sea = g * 0.56
+    p.vgrad(0, sea, "#46637B", "#C4D6DF")
+    ridge(p, sea - 1.5, h * 0.08, 1.5, 0.5, "#324959", y_floor=sea + 2)
+    waves(p, sea, h, "#21516B", "#112E42", crest="#D8ECF5", n=5, seed=23)
 
-    tx, ty = w * 0.30, g - 12
-    p.poly([(tx - 32, ty - 4), (tx + 28, ty - 4), (tx + 34, ty - 8), (tx + 26, ty + 4),
-            (tx - 30, ty + 4)], "#7E2E2A")
-    p.rect(tx - 30, ty - 6, tx + 25, ty - 4, "#404852")
-    p.rect(tx - 30, ty - 14, tx - 20, ty - 6, "#F4F1EA")
-    for k in range(3):
-        p.circle(tx - 12 + k * 10, ty - 7, 2.2, "#59626E")
+    # Smoke plume drifting cleanly into the open upper-right sky clear of the ribbon.
+    sx, sy = w * 0.68, g - 9.5
+    smoke(p, sx + 4, sy - 6, 30, -28, 3.0, 9.8, 16, "#2C3038", 185, seed=19)
+    p.glow(sx + 2, sy - 4, 22, "#FFA84C", 170, steps=12)
 
-    # A nautical compass, not an illustration assigning blame for the hits.
-    cx, cy = w * .875, g * .44
-    p.circle(cx, cy, 14, "#F8F0DF", "#756855", .8)
-    for angle in range(0, 360, 45):
-        a = math.radians(angle)
-        p.line([(cx + 11 * math.sin(a), cy + 11 * math.cos(a)),
-                (cx + 13 * math.sin(a), cy + 13 * math.cos(a))], "#766F66", .8)
-    p.poly([(cx - 3, cy + 1), (cx + 4, cy - 10), (cx + 3, cy + 1)], "#A33131")
-    p.poly([(cx + 3, cy), (cx - 4, cy + 10), (cx - 3, cy)], "#244A5C")
+    # Russian Ro-Ro cargo vessel Sparta II.
+    p.poly([(sx - 32, sy - 2), (sx + 26, sy - 2), (sx + 32, sy - 6.5),
+            (sx + 24, sy + 5), (sx - 30, sy + 5)], "#3F4B56", "#1D2630", 0.5)
+    p.rect(sx - 30, sy + 2.2, sx + 25, sy + 4.8, "#8A342A")
+    p.rect(sx - 28, sy - 10.5, sx - 17, sy - 2, "#E8E3D8", "#4D5864", 0.45)
+    p.rect(sx - 25, sy - 13.5, sx - 20.5, sy - 10.5, "#6C7782")
+    p.rect(sx - 12, sy - 6.5, sx + 13, sy - 2, "#5D6B77")
+    flames(p, sx + 4, sy - 2.2, 16, 17, seed=31)
+
+    # Bright orange lifeboat rowing clear in the foreground left.
+    lx, ly = w * 0.21, g - 5.0
+    p.poly([(lx - 11.5, ly - 1.6), (lx + 11.5, ly - 1.6), (lx + 8.5, ly + 2.8),
+            (lx - 8.5, ly + 2.8)], "#E85D22", "#8C2C0C", 0.5)
+    p.rect(lx - 6.0, ly - 4.4, lx + 5.0, ly - 1.6, "#FFF7EB")
+    p.line([(lx + 12, ly + 2.4), (lx + 27, ly + 2.4)], rgb("#E6F4FA", 170), 0.75)
+
+
+def scene_caboverde(p):
+    """Praia, Cabo Verde: volcanic island horizon, ballot box and 63.96% tally board."""
+    w, h, g = p.w, p.h, p.base
+    sea = g * 0.65
+    p.vgrad(0, sea, "#D89355", "#F9E7C2")
+    ridge(p, sea - 3.5, h * 0.12, 1.3, 1.1, "#82614B", y_floor=sea + 2)
+    ridge(p, sea + 0.5, h * 0.06, 2.0, 2.4, "#5D4537", y_floor=sea + 2)
+    waves(p, sea, h, "#1E5686", "#113355", crest="#F6E2B3", n=4, seed=41)
+
+    # Archival ballot box positioned cleanly below the upper-left ribbon.
+    bx, by = w * 0.50, g - 1.5
+    p.rect(bx - 19, by - 16.5, bx + 19, by, "#F7F1E3", "#182A40", 0.85, r=1.2)
+    p.rect(bx - 18.2, by - 9.2, bx + 18.2, by - 6.0, "#1F4E8C")
+    p.rect(bx - 18.2, by - 6.0, bx + 18.2, by - 4.5, "#FFFFFF")
+    p.rect(bx - 18.2, by - 4.5, bx + 18.2, by - 2.8, "#C42B2B")
+    p.rect(bx - 9, by - 15.0, bx + 9, by - 13.5, "#182A40")
+    p.poly([(bx - 5.5, by - 14.5), (bx - 2.0, by - 25.0), (bx + 8.5, by - 23.0),
+            (bx + 5.0, by - 14.5)], "#FFFFFF", "#182A40", 0.7)
+    p.line([(bx - 0.5, by - 20.0), (bx + 1.5, by - 18.0), (bx + 5.0, by - 22.2)], "#1F7A4D", 1.3)
+
+    # Dark-and-gold tally board in the clear upper-right.
+    p.rect(w - 53, 4, w - 4, 24, "#11161D", "#F0C842", 0.9, r=1.5)
+    p.text(w - 28.5, 14.3, "63.96%", 10.2, "#FFD23F")
+
+
+def scene_bandasea(p):
+    """Banda Sea M6.8: Timor-Leste bathymetric chart, concentric tremor rings and seismograph."""
+    w, h, g = p.w, p.h, p.base
+    sy0 = g - 16.5
+    p.vgrad(0, sy0, "#153A52", "#225B78")
+    for k in range(1, 5):
+        p.line([(w * k / 5, 0), (w * k / 5, sy0)], rgb("#397694", 95), 0.45)
+    p.line([(0, sy0 * 0.55), (w, sy0 * 0.55)], rgb("#397694", 95), 0.45)
+
+    # Stylized Timor-Leste below the ribbon and Banda Arc islands on the right.
+    timor = [(w * 0.14, sy0 - 1.5), (w * 0.28, sy0 - 7.5), (w * 0.52, sy0 - 9.5),
+             (w * 0.64, sy0 - 7.0), (w * 0.54, sy0 - 2.5), (w * 0.34, sy0 + 0.5)]
+    p.poly(timor, "#DFCFAF", "#8A7A62", 0.7)
+    for ix, iy, rx, ry in ((w * 0.72, sy0 - 10, 5.0, 1.8), (w * 0.92, sy0 - 8, 4.5, 1.8)):
+        p.ellipse(ix, iy, rx, ry, "#DFCFAF", "#8A7A62", 0.55)
+
+    # Concentric seismic epicenter rings clearly visible to the right of the ribbon.
+    ex, ey = w * 0.875, 17.5
+    for rr, al in ((13.0, 125), (8.8, 185), (5.0, 235)):
+        p.circle(ex, ey, rr, None, rgb("#F0543E", al), 1.1)
+    p.circle(ex, ey, 2.5, "#FFD24C", "#B22222", 0.7)
+
+    # Clean cream seismograph strip above the caption bar.
+    p.rect(0, sy0, w, h, "#FFFDF8")
+    p.line([(0, sy0), (w, sy0)], "#B8AE9A", 0.75)
+    for k in range(1, 14):
+        p.line([(w * k / 14, sy0), (w * k / 14, h)], "#ECE4D6", 0.4)
+    seismo(p, 4, w - 48, sy0 + 8.5, 6.6, "#C82222", seed=33, width=1.2, burst=0.52)
+    p.rect(w - 44, sy0 + 2.0, w - 4, sy0 + 14.5, "#A82824", r=1.8)
+    p.text(w - 24, sy0 + 8.5, "M 6.8", 9.2, "#FFFFFF")
 
 
 def scene_bepicolombo(p):
@@ -503,44 +556,6 @@ def scene_bahrain(p):
         p.rect(x, g - 5.2, x + 4, g - 2.4, "#EFC887")
 
 
-def scene_ukraine(p):
-    w, h, g = p.w, p.h, p.base
-    p.vgrad(0, h, "#345470", "#D9C49E")
-    for i, top in enumerate((33, 28, 38, 22, 14, 24)):
-        x = i * 34 - 4
-        p.rect(x, top, x + 32, h, "#394959", "#748791", .7)
-        for row in range(top + 4, int(g - 12), 8):
-            for col in range(4):
-                p.rect(x + 4 + col * 7, row, x + 7 + col * 7, row + 4,
-                       "#F6D190" if (row + i + col) % 3 else "#212B37")
-    p.rect(0, g - 8, w, h, "#273143")
-    x, y = w * .28, g - 12
-    p.poly([(x - 20, y - 8), (x + 9, y - 8), (x + 17, y - 1), (x + 19, y + 7),
-            (x - 20, y + 7)], "#F9F1DC", "#142D43", .9)
-    p.rect(x - 18, y + 1, x + 16, y + 3, "#D38A35")
-    p.rect(x + 5, y - 6, x + 10, y - 1, "#436474")
-    p.rect(x - 7, y - 10, x + 1, y - 8, "#86E1F5")
-    for dx in (-12, 11):
-        p.circle(x + dx, y + 7, 3.8, "#17212B", "#85919B", .7)
-
-
-def scene_kordofan(p):
-    w, h, g = p.w, p.h, p.base
-    p.vgrad(0, h, "#DDA263", "#FBE8B3")
-    p.circle(w * .79, g * .44, 13, "#F8DA91")
-    ridge(p, g * .76, 4, 1.4, .7, "#C29869")
-    ridge(p, g * .88, 3, 1.8, .2, "#B07E4C")
-    for x, y, scale in ((43, 43, .75), (63, 41, .8), (85, 44, 1), (108, 43, .78)):
-        p.rect(x - 7 * scale, y, x + 7 * scale, y + 7 * scale, "#E8C189")
-        p.poly([(x - 9 * scale, y), (x, y - 7 * scale), (x + 9 * scale, y)], "#795439")
-        p.rect(x - 2 * scale, y + 2, x + scale, y + 7 * scale, "#5F4A39")
-    x = w * .83
-    p.poly([(x - 4, h), (x - 1, 39), (x - 10, 30), (x, 35), (x + 10, 23),
-            (x + 4, 36), (x + 3, 48), (x + 5, h)], "#493F31")
-    for dx, dy, rad in ((-12, 29, 13), (-2, 24, 16), (10, 22, 14), (19, 26, 9)):
-        p.ellipse(x + dx, dy, rad, 4.2, "#514E34")
-
-
 def scene_flood(p):
     w, h, g = p.w, p.h, p.base
     p.vgrad(0, h, "#728B99", "#DDE6D4")
@@ -594,9 +609,9 @@ def scene_football(p):
 
 
 SCENES = {
-    "cop": scene_cop31, "saudi": scene_saudi, "andes": scene_peru_hero,
-    "bahrain": scene_bahrain, "ukraine": scene_ukraine, "kordofan": scene_kordofan,
-    "tanker": scene_tanker, "flood": scene_flood, "sinaloa": scene_sinaloa,
+    "cop": scene_cop31, "hormuz": scene_hormuz_hero, "andes": scene_peru_hero,
+    "bahrain": scene_bahrain, "baltic": scene_baltic, "caboverde": scene_caboverde,
+    "sinaloa": scene_sinaloa, "flood": scene_flood, "bandasea": scene_bandasea,
     "mercury": scene_bepicolombo, "football": scene_football, "vegas": scene_vegas_pole,
     "cricket": scene_rahul,
 }

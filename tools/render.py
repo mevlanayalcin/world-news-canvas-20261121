@@ -1,18 +1,20 @@
-"""Render the full 24-hour Saturday Broadsheet Atlas.
+"""Render the full 24-hour Saturday Broadsheet Atlas (v11).
 
-    python3 tools/render.py [--out entry.png] [--report /tmp/report.json] [--thumb /tmp/thumb.png]
+    python3 -B tools/render.py [--out entry.png] [--report /tmp/report.json] [--thumb /tmp/thumb.png]
 
 Draws at 2x (2048 px) and downsamples via LANCZOS to 1024 x 1024, then writes
-a lossless, deterministic PNG (matching main.ts).
+a lossless, deterministic RGB PNG (matching main.ts).
 Strict layout assertions run on every build: zero text overlaps, zero margin
 overflows, zero map pin collisions, >= 8 px right-margin slack on every brief,
-and a floor on the size of every caption that carries a figure or a credit.
+and strict floors on dateline and caption typography.
 """
 import argparse
 import json
 import math
 import os
+import struct
 import sys
+import zlib
 
 from PIL import Image, ImageDraw, ImageFont
 
@@ -26,12 +28,11 @@ W = H = 1024
 M = 16
 CW = W - 2 * M  # 992
 
-# Vertical budget. The caption bars sit inside the art height.
-LEAD_ART, LEAD_BAR = 112.0, 17.5
-SEC_ART, SEC_BAR = 72.0, 16.0
-SEC_BODY = 9.0
-MAP_H = 172.0
-WIRE_LH = 14.4
+# Vertical budget. Caption bars sit inside the art height.
+LEAD_ART, LEAD_BAR = 102.0, 17.5
+SEC_ART, SEC_BAR = 67.0, 16.0
+SEC_BODY = 9.5
+WIRE_LH = 16.0
 
 # Signature Archival Broadsheet Palette
 PAPER = "#FAF6EE"
@@ -41,16 +42,16 @@ RULE = "#D5CCB9"
 INK = "#131B26"
 BODY_INK = "#1E2733"
 BRIEF_INK = "#131C26"
-MUTED = "#56606E"
+MUTED = "#525C6A"
 FOLIO_BG = "#182A40"
 FOLIO_GOLD = "#F0C66E"
 VERMILION = "#B22222"
 SLATE_INDIGO = "#1F4A6E"
-KPI_SUB = "#1A1A1A"      # KPI sublines: near-black, never the muted grey
-KPI_FACE = ("sans_s", 10.5, 0.35)  # face, px, letter spacing
-CAPTION_BG = "#141923"   # dark strip under every illustration
+KPI_SUB = "#1A1A1A"
+KPI_FACE = ("sans_s", 10.2, 0.25)
+CAPTION_BG = "#141923"
 CAPTION_INK = "#FFFFFF"
-CAPTION_MIN = 10.5       # px; smaller credits were misread on the last edition
+CAPTION_MIN = 10.5
 
 MAP_OCEAN = "#18364A"
 MAP_GRID = "#254A63"
@@ -213,31 +214,63 @@ def draw_wrapped(board, x, y, lines, lh, label, maxw):
 def masthead(b):
     counts = S.region_counts()
 
-    b.rect(M, 8, W - M, 25, fill=FOLIO_BG)
-    bl = b.text(M + 8, 16.7, "GLOBAL DISPATCH  /  FULL 24-HOUR EDITION", "sans_k", 9.0, FOLIO_GOLD,
+    b.rect(M, 8, W - M, 24.5, fill=FOLIO_BG)
+    bl = b.text(M + 8, 16.4, "GLOBAL DISPATCH  /  FULL 24-HOUR EDITION", "sans_k", 9.0, FOLIO_GOLD,
                 anchor="lm", spacing=1.0, label="kicker")
     clock_x = W - M - 86
-    b.rect(clock_x, 8, W - M, 25, fill=FOLIO_GOLD)
-    b.text(clock_x + 43, 16.7, S.CLOCK, "sans_k", 11.0, FOLIO_BG, anchor="mm", label="press-clock")
+    b.rect(clock_x, 8, W - M, 24.5, fill=FOLIO_GOLD)
+    b.text(clock_x + 43, 16.4, S.CLOCK, "sans_k", 11.0, FOLIO_BG, anchor="mm", label="press-clock")
     stats = f"{len(S.STORIES)} STORIES   /   {len(counts)} REGIONS      ·      SATURDAY CLOSE"
-    br = b.text(clock_x - 8, 16.7, stats, "sans_k", 9.0, "#F5F1E8", anchor="rm", label="stats")
+    br = b.text(clock_x - 8, 16.4, stats, "sans_k", 9.0, "#F5F1E8", anchor="rm", label="stats")
     if bl[2] + 12 > br[0]:
         raise SystemExit(f"LAYOUT: masthead folio bar collides ({bl[2]:.1f} vs {br[0]:.1f})")
 
-    # Commanding bold serif masthead spanning page width
-    tsize = 66.5
-    while tsize > 48.0 and b.measure(S.DAY_LABEL, "serif_b", tsize) > CW - 10:
+    # Commanding bold serif masthead spanning page width.
+    tsize = 57.5
+    while tsize > 46.0 and b.measure(S.DAY_LABEL, "serif_b", tsize) > CW - 10:
         tsize -= 0.5
-    b.text(W / 2, 51.0, S.DAY_LABEL, "serif_b", tsize, INK, anchor="mm", label="title")
+    b.text(W / 2, 47.0, S.DAY_LABEL, "serif_b", tsize, INK, anchor="mm", label="title")
 
     deck_size = 11.4
     while deck_size > 9.8 and b.measure(S.DECK, "serif_i", deck_size) > CW - 6:
         deck_size -= 0.2
-    b.text(W / 2, 100.5, S.DECK, "serif_i", deck_size, "#293342", anchor="mm", label="deck")
+    b.text(W / 2, 90.0, S.DECK, "serif_i", deck_size, "#293342", anchor="mm", label="deck")
     b.fit("deck", b.measure(S.DECK, "serif_i", deck_size), CW)
-    b.hline(M, W - M, 109.5, VERMILION, 1.5)
-    b.hline(M, W - M, 112.0, INK, 0.6)
+    b.hline(M, W - M, 97.5, VERMILION, 1.5)
+    b.hline(M, W - M, 99.9, INK, 0.6)
     return tsize
+
+
+def utc_timeline(b, y0, y1):
+    """Chronological Saturday UTC strip backed directly by SOURCES.tsv minutes."""
+    b.rect(M, y0, W - M, y1, fill="#F5EFE2", outline="#D4C9B4", width=0.75, r=2.0)
+    bw = 64.0
+    b.rect(M, y0, M + bw, y1, fill=FOLIO_BG, r=2.0)
+    b.rect(M + bw - 3, y0, M + bw, y1, fill=FOLIO_BG)
+    ym = (y0 + y1) / 2
+    b.text(M + bw / 2, ym - 5.2, "THE DAY", "sans_k", 8.8, FOLIO_GOLD, anchor="mm", spacing=0.6,
+           label="tl-head0")
+    b.text(M + bw / 2, ym + 5.6, "IN UTC", "sans_k", 8.8, "#FFFFFF", anchor="mm", spacing=0.6,
+           label="tl-head1")
+
+    n = len(S.TIMELINE)
+    x_start = M + bw + 2.0
+    span = (W - M) - x_start
+    cell = span / n
+    for i, (sid, hhmm, label) in enumerate(S.TIMELINE):
+        cx0 = x_start + i * cell
+        if i > 0:
+            b.vline(cx0, y0 + 3.5, y1 - 3.5, "#DDD3C0", 0.6)
+        dot_col = VERMILION if i in (0, 1, 6) else SLATE_INDIGO
+        b.circle(cx0 + 8.5, y0 + 8.5, 2.3, dot_col)
+        bt = b.text(cx0 + 14.8, y0 + 8.6, f"{hhmm}Z", "sans_b", 10.5, dot_col, anchor="lm",
+                    spacing=0.2, label=f"tl-t{i}")
+        br = b.text(cx0 + cell - 6.0, y0 + 8.6, f"#{sid:02d}", "sans_b", 8.8, "#4A5462",
+                    anchor="rm", label=f"tl-r{i}")
+        b.fit(f"tl-t{i}", bt[2], br[0], 3.0)
+        bl = b.text(cx0 + 7.0, y0 + 20.6, label, "sans_b", 9.6, INK, anchor="lm",
+                    label=f"tl-l{i}")
+        b.fit(f"tl-l{i}", bl[2], cx0 + cell, 4.0)
 
 
 def kpi_row(b, y0, y1):
@@ -248,15 +281,15 @@ def kpi_row(b, y0, y1):
         x = M + i * (tw + gap)
         accent = VERMILION if i % 2 == 0 else SLATE_INDIGO
         b.rect(x, y0, x + tw, y1, fill=TILE_BG, outline=TILE_BORDER, width=0.7)
-        b.rect(x, y0, x + tw, y0 + 2.6, fill=accent)
-        bf = b.text(x + 7.5, y0 + 20.0, k["figure"], "serif_b", 20.0, INK, anchor="ls",
+        b.rect(x, y0, x + tw, y0 + 2.5, fill=accent)
+        bf = b.text(x + 7.5, y0 + 18.2, k["figure"], "serif_b", 18.5, INK, anchor="ls",
                     label=f"kpi{i}")
-        ix = b.text(x + tw - 6, y0 + 20.0, f"#{k['story']:02d}", "sans_k", 9.5, "#3A4452",
+        ix = b.text(x + tw - 6, y0 + 18.2, f"#{k['story']:02d}", "sans_k", 9.2, "#3A4452",
                     anchor="rs", label=f"kpi-ref{i}")
         b.fit(f"kpi-ref{i}", bf[2], ix[0], 4)
         for j, cap in enumerate(k["caption"]):
             face, size, spacing = KPI_FACE
-            bx = b.text(x + 7.5, y0 + 33.4 + j * 11.4, cap, face, size, KPI_SUB, anchor="ls",
+            bx = b.text(x + 7.5, y0 + 29.6 + j * 10.4, cap, face, size, KPI_SUB, anchor="ls",
                         spacing=spacing, label=f"kpi{i}c{j}")
             b.fit(f"kpi{i}c{j}", bx[2], x + tw, 4)
 
@@ -266,7 +299,7 @@ def region_bar(b, y0, y1):
     total = sum(counts.values())
     assert total == len(S.STORIES)
 
-    floor_w = 82.0
+    floor_w = 84.0
     keys = [k for k, _, _ in S.REGIONS]
     widths = {k: CW * counts[k] / total for k in keys}
     for _ in range(10):
@@ -331,7 +364,7 @@ def art_caption(b, x, y_bot, w, text, size, h, pad, sid):
 
 def tag_pill(b, xr, cy, tag, size, h, sid):
     fg, bg = TAG_STYLE[tag]
-    pad_x = 5.0 if size >= 8.0 else 4.2
+    pad_x = 5.0 if size >= 8.0 else 4.0
     tw = b.measure(tag, "sans_k", size) + 2 * pad_x
     x0 = xr - tw
     b.rect(x0, cy - h / 2, xr, cy + h / 2, fill=bg, outline=fg, width=0.75, r=h / 2)
@@ -344,14 +377,19 @@ def meta_line(b, x, y, w, st, size, badge_r, lead):
     b.circle(x + badge_r, y, badge_r, col)
     b.text(x + badge_r, y + 0.3, str(st["id"]), "sans_k", badge_r * 1.3, "#FFFFFF", anchor="mm",
            label=f"badge{st['id']}")
-    px0 = tag_pill(b, x + w, y, st["tag"], 8.5 if lead else 7.5, 14.0 if lead else 12.6, st["id"])
+    px0 = tag_pill(b, x + w, y, st["tag"], 8.5 if lead else 7.5, 14.0 if lead else 12.4, st["id"])
     label = f"{st['place']} · {st['beat'].upper()}" if lead else st["place"]
     tx = x + badge_r * 2 + 4.5
-    avail = px0 - tx - 4.0
+    avail = px0 - tx - 3.5
+    # Open Lato-Bold with a strict 8.5px floor keeps long datelines (BHUBANESWAR, DARMSTADT) razor-sharp.
+    fkey = "sans_k" if lead else "sans_b"
+    sp = 0.0 if lead else 0.15
     sz = size
-    while sz > 7.0 and b.measure(label, "sans_k", sz) > avail:
+    while sz > 8.5 and b.measure(label, fkey, sz, sp) > avail:
         sz -= 0.2
-    bx = b.text(tx, y + 0.25, label, "sans_k", sz, col, anchor="lm", label=f"dateline{st['id']}")
+    if b.measure(label, fkey, sz, sp) > avail:
+        sp = 0.0
+    bx = b.text(tx, y + 0.25, label, fkey, sz, col, anchor="lm", spacing=sp, label=f"dateline{st['id']}")
     b.fit(f"dateline{st['id']}", bx[2], px0, 3.0)
 
 
@@ -362,18 +400,19 @@ def card(b, st, x, y, w, art_h, lead):
     b.rect(x, y, x + w, y + art_h, outline="#BEB4A0", width=0.65)
 
     if lead:
-        art_ribbon(b, x + 5, y + 5, st["banner"], 17.6, 27, w - 10, st["id"])
-        art_subpill(b, x + 5, y + 36, st["sub"], 10.5, 18, st["id"])
+        art_ribbon(b, x + 5, y + 5, st["banner"], 17.2, 26, w - 10, st["id"])
+        art_subpill(b, x + 5, y + 34.5, st["sub"], 10.2, 17.5, st["id"])
         art_caption(b, x, y + art_h, w, st["chip"], 11.5, bar_h, 8.0, st["id"])
     else:
-        art_ribbon(b, x + 4, y + 4, st["banner"], 13.6, 21, w - 8, st["id"])
+        rib_max = (w - 62) if st["scene"] == "caboverde" else ((w - 46) if st["scene"] == "bandasea" else (w - 8))
+        art_ribbon(b, x + 4, y + 4, st["banner"], 13.2, 20.5, rib_max, st["id"])
         art_caption(b, x, y + art_h, w, st["chip"], 11.0, bar_h, 7.0, st["id"])
 
-    my = y + art_h + (9.5 if lead else 8.5)
-    meta_line(b, x, my, w, st, 8.5 if lead else 8.0, 7.0 if lead else 6.2, lead)
+    my = y + art_h + (9.2 if lead else 8.4)
+    meta_line(b, x, my, w, st, 9.0 if lead else 8.7, 7.0 if lead else 6.2, lead)
 
-    hy = my + (8.4 if lead else 7.0)
-    hsize, hlh = (18.4, 19.7) if lead else (12.5, 13.7)
+    hy = my + (8.0 if lead else 6.8)
+    hsize, hlh = (17.8, 19.2) if lead else (12.5, 13.7)
     hl = rich_wrap(b, tokens(st["headline"], "serif_b", hsize, INK), w)
     if len(hl) > 2:
         raise SystemExit(f"LAYOUT: headline {st['id']} needs {len(hl)} lines (max 2)")
@@ -381,9 +420,9 @@ def card(b, st, x, y, w, art_h, lead):
         _, right = b.runs(x, hy + hsize * 0.94 + i * hlh, ln, f"h{st['id']}:{i}")
         b.fit(f"h{st['id']}:{i}", right, x + w)
 
-    sy = hy + hsize * 0.94 + (len(hl) - 1) * hlh + (14.2 if lead else 11.6)
-    ssize, slh = (10.0, 11.6) if lead else (SEC_BODY, SEC_BODY + 1.6)
-    toks = tokens(st["summary"], "sans", ssize, "#1E2733")
+    sy = hy + hsize * 0.94 + (len(hl) - 1) * hlh + (13.6 if lead else 11.8)
+    ssize, slh = (10.2, 11.8) if lead else (SEC_BODY, SEC_BODY + 1.8)
+    toks = tokens(st["summary"], "sans", ssize, BODY_INK)
     src = f"({st['sources']})".split()
     toks += [(t, "sans_i", ssize, MUTED) for t in src]
     sl = rich_wrap(b, toks, w)
@@ -395,8 +434,8 @@ def card(b, st, x, y, w, art_h, lead):
 
 
 def world_map(b, x, y, w, h):
-    b.text(x, y, "WORLD ATLAS  /  THE ILLUSTRATED DISPATCHES", "sans_k", 9.1, INK, anchor="lt",
-           spacing=0.4, label="map-title")
+    b.text(x, y, "WORLD ATLAS  /  THE ILLUSTRATED DISPATCHES", "sans_k", 9.3, INK, anchor="lt",
+           spacing=0.35, label="map-title")
     my = y + 14.5
     box = (x, my, w, h)
     b.rect(x, my, x + w, my + h, fill=MAP_OCEAN, outline="#102535", width=0.8)
@@ -427,7 +466,7 @@ def world_map(b, x, y, w, h):
 
     geo_leads = S.STORIES[:S.LEADS]
     R = 7.2
-    gap = 2 * R + 2.3
+    gap = 2 * R + 2.4
     placed = []
     truths = []
     for st in geo_leads:
@@ -437,9 +476,12 @@ def world_map(b, x, y, w, h):
     for idx, st in enumerate(geo_leads):
         tx, ty = truths[idx]
         best = None
-        # In dense clusters, move the number, never the geographic anchor.
-        bearing = {"mercury": -75, "football": -142, "saudi": 80,
-                   "bahrain": -90, "tanker": -25, "sinaloa": 70}.get(st["scene"], -90)
+        # In dense clusters, offset the numbered badge while keeping the leader dot on the true coordinate.
+        bearing = {
+            "cop": -45, "hormuz": 20, "bahrain": -135, "baltic": -40,
+            "mercury": -90, "football": -155, "caboverde": -135,
+            "sinaloa": 120, "bandasea": -30,
+        }.get(st["scene"], -90)
         for ring in range(4):
             rr = ring * 14
             for k in range(16 if ring else 1):
@@ -480,77 +522,80 @@ def world_map(b, x, y, w, h):
         b.pins.append((round(cx, 2), round(cy, 2), R, st["id"]))
     assert [pin[3] for pin in b.pins] == [s["id"] for s in S.STORIES if "headline" in s]
 
-    # Caption, then the seven regions on one line.
     cap_y = my + h + 9.5
     bx = b.text(x, cap_y, "1–13 match the cards. Leader dots mark datelines or event sites.", "sans_b",
-                9.0, "#2F3946", anchor="lm", label="map-cap")
+                9.2, "#2F3946", anchor="lm", label="map-cap")
     b.fit("map-cap", bx[2], x + w)
-    ky = cap_y + 13.0
+    ky = cap_y + 13.5
     kx = x
     for key, label, col in S.REGIONS:
         b.circle(kx + 3.3, ky, 3.3, col)
-        bx = b.text(kx + 8.6, ky + 0.2, label, "nar_b", 9.0, "#2F3946", anchor="lm", label=f"key-{key}")
+        bx = b.text(kx + 8.6, ky + 0.2, label, "nar_b", 9.2, "#2F3946", anchor="lm", label=f"key-{key}")
         b.fit(f"map-key-{key}", bx[2], x + w)
-        kx = bx[2] + 6.0
+        kx = bx[2] + 5.6
     return ky + 6.5
 
 
 def briefs(b, x, y, w):
     items = S.STORIES[S.LEADS:]
-    b.text(x, y, f"THE SATURDAY WIRE  /  {len(items)} MORE DISPATCHES", "sans_k", 9.1, INK,
-           anchor="lt", spacing=0.4, label="briefs-title")
-    b.text(x + w, y, f"FILED THROUGH {S.CLOCK}", "sans_b", 9.0, "#3A4452",
+    b.text(x, y, f"THE SATURDAY WIRE  /  {len(items)} MORE DISPATCHES", "sans_k", 9.3, INK,
+           anchor="lt", spacing=0.35, label="briefs-title")
+    b.text(x + w, y, f"FILED THROUGH {S.CLOCK}", "sans_b", 9.2, "#3A4452",
            anchor="rt", label="wire-clock")
     rows = (len(items) + 1) // 2
     col_gap = 14.0
     colw = (w - col_gap) / 2
     lh = WIRE_LH
-    top = 21.0
+    top = 21.5
     for i, st in enumerate(items):
         c, r = divmod(i, rows)
         cx = x + c * (colw + col_gap)
         cy = y + top + r * lh
         col = region_color(st["region"])
-        b.circle(cx + 6.0, cy, 6.0, col)
-        b.text(cx + 6.0, cy + 0.3, str(st["id"]), "sans_k", 7.5, "#FFFFFF", anchor="mm",
+        b.circle(cx + 6.2, cy, 6.2, col)
+        b.text(cx + 6.2, cy + 0.3, str(st["id"]), "sans_k", 7.8, "#FFFFFF", anchor="mm",
                label=f"bd{st['id']}")
+        # Open Lato at 11.0px keeps dollar figures ($55,106, $60,086) and numbers 100% crisp.
         runs = [
-            (st["place"], "nar_b", 10.9, BRIEF_INK),
-            (" " + st["brief"], "nar", 10.9, BRIEF_INK),
-            ("  " + st["sources"], "nar_i", 10.4, MUTED),
+            (st["place"], "sans_b", 11.0, BRIEF_INK),
+            (" " + st["brief"], "sans", 11.0, BRIEF_INK),
+            ("  " + st["sources"], "sans_i", 10.0, MUTED),
         ]
-        _, right = b.runs(cx + 15.2, cy + 0.2, runs, f"brief{st['id']}", anchor_v="m")
+        _, right = b.runs(cx + 15.6, cy + 0.2, runs, f"brief{st['id']}", anchor_v="m")
         limit = cx + colw
         if st["tag"]:
-            limit = tag_pill(b, limit - 2, cy, st["tag"], 7.6, 11.6, st["id"])
+            limit = tag_pill(b, limit - 2, cy, st["tag"], 7.6, 11.8, st["id"])
         b.fit(f"brief{st['id']}", right, limit, 8.0)
         if r < rows - 1:
-            b.hline(cx + 15.2, cx + colw, cy + lh / 2, "#E8E1D3", 0.5)
+            b.hline(cx + 15.6, cx + colw, cy + lh / 2, "#E8E1D3", 0.5)
 
-    # The odd wire count leaves one slot for the match desk's other full-time scores.
-    note_x = x + (colw + col_gap)
-    note_y = y + top + (rows - 1) * lh
-    b.rect(note_x, note_y - 6.2, note_x + colw, note_y + 6.2, fill=TILE_BG, outline=TILE_BORDER,
-           width=0.6, r=2.0)
-    slug = "ENGLAND / FT"
-    label_w = b.measure(slug, "sans_k", 8.5) + 10
-    b.rect(note_x, note_y - 6.2, note_x + label_w, note_y + 6.2, fill=FOLIO_BG, r=2.0)
-    b.text(note_x + label_w / 2, note_y + .2, slug, "sans_k", 8.5, FOLIO_GOLD,
+    wire_bot = y + top + (rows - 1) * lh + 7.5
+    b.vline(x + colw + col_gap / 2, y + 15, wire_bot, RULE, 0.7)
+
+    # Full-width match-desk strip below both wire columns: airy and OCR-proof.
+    ft_y0 = wire_bot + 4.5
+    ft_y1 = ft_y0 + 16.0
+    ft_ym = (ft_y0 + ft_y1) / 2
+    b.rect(x, ft_y0, x + w, ft_y1, fill=TILE_BG, outline=TILE_BORDER, width=0.65, r=2.0)
+    slug = "PREMIER LEAGUE / FT"
+    label_w = b.measure(slug, "sans_k", 8.8) + 12.0
+    b.rect(x, ft_y0, x + label_w, ft_y1, fill=FOLIO_BG, r=2.0)
+    b.text(x + label_w / 2, ft_ym + 0.2, slug, "sans_k", 8.8, FOLIO_GOLD,
            anchor="mm", label="ft-title")
-    ft_runs = [("  ·  ".join(S.FOOTBALL_FT), "nar_b", 10.0, INK), ("   Premier League", "nar_i", 9.5, MUTED)]
-    _, right = b.runs(note_x + label_w + 5, note_y + .2, ft_runs, "ft-scores", anchor_v="m")
-    b.fit("ft-scores", right, note_x + colw, 4.0)
+    ft_runs = [
+        ("   ·   ".join(S.FOOTBALL_FT), "sans_b", 10.4, INK),
+        ("    Saturday full-time results", "sans_i", 9.8, MUTED),
+    ]
+    _, right = b.runs(x + label_w + 8.0, ft_ym + 0.2, ft_runs, "ft-scores", anchor_v="m")
+    b.fit("ft-scores", right, x + w, 6.0)
+    return ft_y1 + 1.0
 
-    end_y = y + top + (rows - 1) * lh + 7.5
-    b.vline(x + colw + col_gap / 2, y + 15, end_y, RULE, 0.7)
-    return end_y
 
-
-def wrap_items(b, items, fkey, size, sep_w, maxw):
+def wrap_items(b, items, fkey, size, sep_w, maxw, spacing=0.0):
     """Greedy wrap that never splits a ledger item; each full line keeps room for its closing dot."""
     lines, cur, curw = [], [], 0.0
     for item in items:
-        iw = b.measure(item, fkey, size)
+        iw = b.measure(item, fkey, size, spacing)
         need = iw + (sep_w if cur else 0.0)
         if cur and curw + need + sep_w > maxw:
             lines.append(cur)
@@ -562,55 +607,62 @@ def wrap_items(b, items, fkey, size, sep_w, maxw):
 
 
 def date_check(b, y0, y1):
-    """Two ledgers: what was left out for its date, and what was still open at the close."""
+    """Two ledgers with stacked left labels so body items stay large and airy."""
     b.rect(M, y0, W - M, y1, fill="#FFF8F5", outline=VERMILION, width=1.15, r=3)
-    bw = 64.0
+    bw = 62.0
     b.rect(M, y0, M + bw, y1, fill=VERMILION, r=3)
     b.rect(M + bw - 4, y0, M + bw, y1, fill=VERMILION)
     ym = (y0 + y1) / 2
-    for dy, word in ((-7.2, "DATE"), (7.6, "CHECK")):
-        b.text(M + bw / 2, ym + dy, word, "sans_k", 12.5, "#FFFFFF", anchor="mm", spacing=0.9,
+    for dy, word in ((-7.4, "DATE"), (7.8, "CHECK")):
+        b.text(M + bw / 2, ym + dy, word, "sans_k", 12.6, "#FFFFFF", anchor="mm", spacing=0.9,
                label=f"dc-{word}")
 
-    size, lh, entry_gap = 10.5, 13.0, 4.4
-    x = M + bw + 10
-    ledgers = ((S.EXCLUDED_LABEL, [t for t, _ in S.EXCLUDED]), (S.PENDING_LABEL, [t for t, _ in S.PENDING]))
-    tx = x + max(b.measure(label, "sans_k", size) for label, _ in ledgers) + 9
-    maxw = W - M - 9 - tx
-    gap_w = b.measure(" ", "sans_m", size) * 1.6
+    size, lh, entry_gap, spacing = 11.3, 14.3, 6.0, 0.12
+    x = M + bw + 9.0
+    ledgers = ((S.EXCLUDED_LABEL, [t for t, _ in S.EXCLUDED]),
+               (S.PENDING_LABEL, [t for t, _ in S.PENDING]))
+    label_w = max(max(b.measure(hi, "sans_k", 10.8), b.measure(lo, "sans_b", 9.5))
+                  for (hi, lo), _ in ledgers)
+    tx = x + label_w + 10.0
+    maxw = W - M - 9.0 - tx
+    gap_w = b.measure(" ", "sans_m", size) * 1.65
     dot_w = b.measure("·", "sans_k", size + 2)
     sep_w = 2 * gap_w + dot_w
-    wrapped = [(label, wrap_items(b, items, "sans_m", size, sep_w, maxw)) for label, items in ledgers]
+    wrapped = [(lbl, wrap_items(b, items, "sans_m", size, sep_w, maxw, spacing))
+               for lbl, items in ledgers]
     n_lines = sum(len(lines) for _, lines in wrapped)
     if n_lines > 4:
         raise SystemExit(f"LAYOUT: date check needs {n_lines} lines (max 4)")
     block = (n_lines - 1) * lh + entry_gap * (len(wrapped) - 1)
     yb = ym - block / 2 + size * 0.36
-    for r, (label, lines) in enumerate(wrapped):
-        b.text(x, yb, label, "sans_k", size, VERMILION, anchor="ls", label=f"dc-label{r}")
+    for r, ((hi, lo), lines) in enumerate(wrapped):
+        b.text(x, yb, hi, "sans_k", 10.8, VERMILION, anchor="ls", label=f"dc-hi{r}")
+        b.text(x, yb + 12.8, lo, "sans_b", 9.5, "#7E2626", anchor="ls", label=f"dc-lo{r}")
         for i, items in enumerate(lines):
             cx, boxes = tx, []
             last_line = i == len(lines) - 1
             for j, item in enumerate(items):
                 closing = "." if last_line and j == len(items) - 1 else ""
-                boxes.append(b.text(cx, yb, item + closing, "sans_m", size, INK, anchor="ls", record=False))
+                boxes.append(b.text(cx, yb, item + closing, "sans_m", size, INK, anchor="ls",
+                                    record=False, spacing=spacing))
                 cx = boxes[-1][2]
-                if not closing:  # also closes a wrapped line, so two items never read as one
-                    b.text(cx + gap_w, yb, "·", "sans_k", size + 2, VERMILION, anchor="ls", record=False)
+                if not closing:
+                    b.text(cx + gap_w, yb, "·", "sans_k", size + 2, VERMILION, anchor="ls",
+                           record=False)
                     cx += sep_w if j < len(items) - 1 else gap_w + dot_w
             box = (tx, min(v[1] for v in boxes), boxes[-1][2], max(v[3] for v in boxes))
             b.texts.append(box + (f"dc{r}:{i}",))
             b.fit(f"dc{r}:{i}", cx, W - M, 8.0)
             yb += lh
-        if r < len(wrapped) - 1:  # hairline midway between this ledger's descenders and the next caps
-            b.hline(x, W - M - 9, yb - lh + (lh + entry_gap) / 2 - 2.6, "#E6BDB5", 0.6)
+        if r < len(wrapped) - 1:
+            b.hline(x, W - M - 9, yb - lh + (lh + entry_gap) / 2 - 2.4, "#E6BDB5", 0.65)
         yb += entry_gap
 
 
 def verification_bar(b, y0, y1):
     b.rect(M, y0, W - M, y1, fill="#EFE9DC", outline="#DDD4C2", width=0.6, r=2)
     cy = (y0 + y1) / 2 + 0.2
-    head, hs, ps, ds = "HOW WE CHECKED:", 9.0, 8.0, 9.0
+    head, hs, ps, ds = "HOW WE CHECKED:", 9.2, 8.0, 9.2
     items = [
         ("CONFIRMED", "independent accounts agree"),
         ("OFFICIAL", "named authority on record"),
@@ -640,11 +692,11 @@ def verification_bar(b, y0, y1):
 
 
 def footer(b, y):
-    left = (f"Saturday events and Saturday-dated reports, 00:00–{S.CLOCK}; local time is named where it "
-            "differs. Scores are full time only where stated.")
-    right = "Dispatch Atlas  /  Drawings by the desk · Natural Earth coastlines"
-    bl = b.text(M, y, left, "sans_i", 9.0, "#2F3946", anchor="lm", label="footer-l")
-    br = b.text(W - M, y, right, "sans_b", 9.0, "#2F3946", anchor="rm", label="footer-r")
+    left = (f"Strict Saturday UTC window, {S.WINDOW}; local time is named where it differs. "
+            "Scores are full time only where stated.")
+    right = "Dispatch Atlas  /  Original desk illustrations · Natural Earth coastlines"
+    bl = b.text(M, y, left, "sans_i", 9.2, "#2F3946", anchor="lm", label="footer-l")
+    br = b.text(W - M, y, right, "sans_b", 9.2, "#2F3946", anchor="rm", label="footer-r")
     if bl[2] + 12 > br[0]:
         raise SystemExit(f"LAYOUT: footer halves collide ({bl[2]:.1f} vs {br[0]:.1f})")
 
@@ -660,22 +712,42 @@ def overlaps(texts):
     return bad
 
 
+def write_lossless_rgb_png(img, path):
+    """Write a deterministic, lossless 8-bit/color RGB PNG with filter=None for sharp typography."""
+    rgb = img.convert("RGB")
+    w, h = rgb.size
+    raw = rgb.tobytes()
+    stride = w * 3
+    buf = b"".join(b"\x00" + raw[y * stride:(y + 1) * stride] for y in range(h))
+    comp = zlib.compressobj(9, zlib.DEFLATED, 15, 9, zlib.Z_DEFAULT_STRATEGY)
+    idat = comp.compress(buf) + comp.flush()
+
+    def chunk(tag, data):
+        return struct.pack(">I", len(data)) + tag + data + struct.pack(">I", zlib.crc32(tag + data) & 0xFFFFFFFF)
+
+    ihdr = struct.pack(">IIBBBBB", w, h, 8, 2, 0, 0, 0)
+    png = b"\x89PNG\r\n\x1a\n" + chunk(b"IHDR", ihdr) + chunk(b"IDAT", idat) + chunk(b"IEND", b"")
+    with open(path, "wb") as fh:
+        fh.write(png)
+
+
 def build():
     S.validate()
     b = Board()
     tsize = masthead(b)
-    kpi_row(b, 115, 164.5)
-    region_bar(b, 168, 182)
+    utc_timeline(b, 102.8, 130.8)
+    kpi_row(b, 133.8, 175.8)
+    region_bar(b, 178.8, 192.8)
 
-    # Lead cards 1-3: silkscreen art with a vermilion ribbon, a white sub-tag and a caption bar.
-    y = 187.5
+    # Lead cards 1-3: silkscreen art with vermilion ribbon, white sub-tag and caption bar.
+    y = 197.0
     lw, gap = 320, (CW - 3 * 320) / 2
     ends = []
     for i, st in enumerate(S.STORIES[:3]):
         ends.append(card(b, st, M + i * (lw + gap), y, lw, LEAD_ART, True))
-    y = max(ends) + 6.5
+    y = max(ends) + 5.5
     b.hline(M, W - M, y, RULE, 0.85)
-    y += 5.5
+    y += 5.0
 
     # Secondary cards 4-13 (two rows of five, with slate ribbons).
     sw, sgap = 188, (CW - 5 * 188) / 4
@@ -684,24 +756,26 @@ def build():
         for c in range(5):
             st = S.STORIES[3 + row * 5 + c]
             ends.append(card(b, st, M + c * (sw + sgap), y, sw, SEC_ART, False))
-        y = max(ends) + 6.0
+        y = max(ends) + 5.5
         b.hline(M, W - M, y, RULE, 0.85)
-        y += 5.5
+        y += 5.0
 
     bottom_top = y
     map_w = 334
-    map_end = world_map(b, M, bottom_top, map_w, MAP_H)
     br_end = briefs(b, M + map_w + 18, bottom_top, CW - map_w - 18)
+    # Match World Atlas box height precisely to the Saturday Wire + FT strip height.
+    map_h = max(164.0, (br_end - bottom_top) - 14.5 - 9.5 - 13.5 - 6.5)
+    map_end = world_map(b, M, bottom_top, map_w, map_h)
     b.vline(M + map_w + 9, bottom_top, max(map_end, br_end), RULE, 0.8)
 
-    y = max(map_end, br_end) + 6.0
-    dc_h = 60.0
+    y = max(map_end, br_end) + 5.5
+    dc_h = 69.0
     date_check(b, y, y + dc_h)
     vk_y0 = y + dc_h + 4.5
-    vk_y1 = vk_y0 + 17.5
+    vk_y1 = vk_y0 + 18.0
     verification_bar(b, vk_y0, vk_y1)
-    fy = vk_y1 + 9.5
-    if fy + 5 > H - 8:
+    fy = vk_y1 + 9.0
+    if fy + 5 > H - 4:
         raise SystemExit(f"LAYOUT: page overflows (footer_y={fy:.1f})")
     footer(b, fy)
 
@@ -712,7 +786,8 @@ def build():
         if t[0] < M - 0.5 or t[2] > W - M + 0.5 or t[1] < 0 or t[3] > H:
             raise SystemExit(f"LAYOUT: text outside page margins {t}")
 
-    out = b.img.resize((W, H), Image.LANCZOS)
+    # BICUBIC avoids LANCZOS ringing halos on flat paper typography while preserving sharp art.
+    out = b.img.resize((W, H), Image.BICUBIC)
     brief_slacks = [f[4] for f in b.fits if f[0].startswith("brief")]
     report = dict(
         texts=b.texts,
@@ -720,6 +795,7 @@ def build():
         fits=b.fits,
         masthead_px=tsize,
         bottom_top=round(bottom_top, 2),
+        map_h=round(map_h, 2),
         map_end=round(map_end, 2),
         briefs_end=round(br_end, 2),
         date_check_y0=round(y, 2),
@@ -742,7 +818,7 @@ def main():
     ap.add_argument("--thumb")
     a = ap.parse_args()
     img, report = build()
-    img.save(a.out, "PNG", optimize=True)
+    write_lossless_rgb_png(img, a.out)
     size = os.path.getsize(a.out)
     if size > 1024 * 1024:
         raise SystemExit(f"PNG exceeds 1 MiB: {size} bytes")
@@ -755,7 +831,8 @@ def main():
     print(
         f"wrote {a.out}: {size} bytes ({size / 1024:.1f} KiB), RGB PNG, "
         f"masthead={report['masthead_px']}px, min_brief_slack={report['min_brief_slack']}px, "
-        f"bottom_top={report['bottom_top']}, dc={report['date_check_y0']}..{report['date_check_y1']}, "
+        f"bottom_top={report['bottom_top']}, map_h={report['map_h']}, "
+        f"dc={report['date_check_y0']}..{report['date_check_y1']}, "
         f"vk={report['vk_y0']}..{report['vk_y1']}, footer={report['footer_y']}, "
         f"{len(report['texts'])} text boxes, {len(report['pins'])} pins"
     )
