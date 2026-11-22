@@ -252,57 +252,72 @@ def scene_cop31(p):
     p.line([(x + 24, y + 46.5), (x + 46, y + 43.5)], "#AF392F", 1.5)
 
 
-def scene_hormuz_hero(p):
-    """Strait of Hormuz: two outbound tankers off Khasab with an archival compass rose."""
+def scene_gulf_hero(p):
+    """Persian Gulf diptych: Bahrain industrial plant fire on left, two Hormuz tankers + compass on right."""
     w, h, g = p.w, p.h, p.base
     sea = g * 0.56
-    p.vgrad(0, sea, "#E7B482", "#FAF0DC")
-    p.glow(w * 0.68, sea * 0.85, h * 0.58, "#FFE3A6", 115)
+    p.vgrad(0, sea, "#DFAA7B", "#FAF0DC")
+    p.glow(w * 0.68, sea * 0.85, h * 0.54, "#FFE3A6", 110)
 
-    # Layered Musandam / Khasab headlands behind the strait.
+    # Layered Musandam / Khasab headlands behind the Strait of Hormuz.
     ridge(p, sea - 10.5, h * 0.11, 1.4, 0.4, "#BA8D66", y_floor=sea + 2)
     ridge(p, sea - 3.8, h * 0.07, 2.2, 1.6, "#8E6346", y_floor=sea + 2)
     waves(p, sea, h, "#2B7A96", "#15455C", n=5, seed=15)
 
-    # Distant outbound tanker (right-center) with alert beacon rings.
-    tx2, ty2 = w * 0.65, sea + (g - sea) * 0.34
-    p.line([(tx2 - 34, ty2 + 3.2), (tx2 - 14, ty2 + 3.2)], rgb("#D8F1F8", 145), 0.7)
-    p.poly([(tx2 - 22, ty2 - 2.5), (tx2 + 21, ty2 - 2.5), (tx2 + 26, ty2 - 5.5),
-            (tx2 + 20, ty2 + 3.2), (tx2 - 21, ty2 + 3.2)], "#6F2829")
-    p.rect(tx2 - 21, ty2 - 4.2, tx2 + 19, ty2 - 2.4, "#3B434E")
-    p.rect(tx2 - 21, ty2 - 10.5, tx2 - 13, ty2 - 4.2, "#F6F2E9", "#7C756A", 0.35)
-    p.rect(tx2 - 19, ty2 - 13.5, tx2 - 16, ty2 - 10.5, "#B0322E")
+    # Left shore: Bahrain industrial facility silhouette with fire & smoke plume (clear below sub-tag).
+    bx_end = w * 0.345
+    smoke(p, w * 0.255, g - 15, 22, -25, 2.8, 7.8, 12, "#2E303A", 165, seed=13)
+    p.glow(w * 0.245, g - 11, 22, "#FFBD63", 175, steps=10)
+    flames(p, w * 0.245, g - 6, 17, 19, seed=7)
+    for sx, top in ((14, g - 26), (22, g - 22), (92, g - 25)):
+        p.poly([(sx, h), (sx + 1, top), (sx + 3.5, top), (sx + 5, h)], "#2C2E3E")
+        p.line([(sx + 1, top + 3.5), (sx + 3.5, top + 3.5)], "#E5C19F", 0.9)
+    roof = [(0, h), (0, g - 8)]
+    for x in range(0, int(bx_end), 18):
+        roof.extend([(x + 13, g - 15), (x + 13, g - 8)])
+    p.poly(roof + [(bx_end + 8, g - 5), (bx_end + 14, h)], "#182839")
+    for x in range(6, int(bx_end) - 4, 9):
+        p.rect(x, g - 5.2, x + 3.6, g - 2.6, "#F2CA85")
+
+    # Right sea lane: distant outbound tanker off Khasab with alert beacon arcs.
+    tx2, ty2 = w * 0.785, sea + (g - sea) * 0.34
+    p.line([(tx2 - 30, ty2 + 3.0), (tx2 - 12, ty2 + 3.0)], rgb("#D8F1F8", 145), 0.7)
+    p.poly([(tx2 - 20, ty2 - 2.4), (tx2 + 19, ty2 - 2.4), (tx2 + 24, ty2 - 5.2),
+            (tx2 + 18, ty2 + 3.0), (tx2 - 19, ty2 + 3.0)], "#6F2829")
+    p.rect(tx2 - 19, ty2 - 4.0, tx2 + 17, ty2 - 2.3, "#3B434E")
+    p.rect(tx2 - 19, ty2 - 10.0, tx2 - 12, ty2 - 4.0, "#F6F2E9", "#7C756A", 0.35)
+    p.rect(tx2 - 17, ty2 - 12.8, tx2 - 14.5, ty2 - 10.0, "#B0322E")
     for k in range(3):
-        p.circle(tx2 - 8 + k * 8.5, ty2 - 5.0, 1.8, "#58626E")
-    for rr, al in ((9.5, 195), (15.0, 130)):
-        p.arc(tx2 + 4, ty2 - 4, rr, 200, 340, rgb("#D43D2C", al), 1.05)
+        p.circle(tx2 - 7 + k * 7.8, ty2 - 4.8, 1.7, "#58626E")
+    for rr, al in ((8.8, 195), (13.8, 130)):
+        p.arc(tx2 + 3, ty2 - 4, rr, 200, 340, rgb("#D43D2C", al), 1.0)
 
-    # Foreground outbound tanker (lower-left, clear of the ribbon and sub-tag).
-    tx1, ty1 = w * 0.30, g - 10.5
-    p.line([(tx1 - 54, ty1 + 4.8), (tx1 - 30, ty1 + 4.8)], rgb("#D8F1F8", 160), 0.9)
-    p.poly([(tx1 - 36, ty1 - 3.8), (tx1 + 31, ty1 - 3.8), (tx1 + 38, ty1 - 8.2),
-            (tx1 + 29, ty1 + 4.8), (tx1 - 34, ty1 + 4.8)], "#862B28")
-    p.rect(tx1 - 34, ty1 - 6.2, tx1 + 28, ty1 - 3.8, "#38414C")
-    p.rect(tx1 - 34, ty1 - 15.2, tx1 - 22, ty1 - 6.2, "#F7F3EA", "#6F685E", 0.4)
-    p.rect(tx1 - 31, ty1 - 19.2, tx1 - 27, ty1 - 15.2, "#1F4A6E")
+    # Mid-foreground outbound tanker in the Strait of Hormuz.
+    tx1, ty1 = w * 0.56, g - 10.2
+    p.line([(tx1 - 46, ty1 + 4.4), (tx1 - 26, ty1 + 4.4)], rgb("#D8F1F8", 160), 0.85)
+    p.poly([(tx1 - 31, ty1 - 3.5), (tx1 + 27, ty1 - 3.5), (tx1 + 33, ty1 - 7.5),
+            (tx1 + 25, ty1 + 4.4), (tx1 - 29, ty1 + 4.4)], "#862B28")
+    p.rect(tx1 - 29, ty1 - 5.6, tx1 + 24, ty1 - 3.5, "#38414C")
+    p.rect(tx1 - 29, ty1 - 14.0, tx1 - 18, ty1 - 5.6, "#F7F3EA", "#6F685E", 0.4)
+    p.rect(tx1 - 26.5, ty1 - 17.5, tx1 - 23, ty1 - 14.0, "#1F4A6E")
     for k in range(4):
-        p.circle(tx1 - 15 + k * 10.5, ty1 - 7.3, 2.3, "#5B6572")
-    for rr, al in ((11.0, 205), (17.5, 135)):
-        p.arc(tx1 + 8, ty1 - 6, rr, 205, 335, rgb("#D43D2C", al), 1.15)
+        p.circle(tx1 - 12 + k * 9.0, ty1 - 6.7, 2.1, "#5B6572")
+    for rr, al in ((10.0, 205), (15.5, 135)):
+        p.arc(tx1 + 6, ty1 - 5.5, rr, 205, 335, rgb("#D43D2C", al), 1.1)
 
-    # Archival nautical compass rose in the clear upper-right sky (no blame implied).
-    cx, cy, cr = w * 0.895, 29.0, 18.5
+    # Archival nautical compass rose in the clear upper-right sky.
+    cx, cy, cr = w * 0.895, 29.0, 18.0
     p.circle(cx, cy, cr, "#FAF2E1", "#6D5E4C", 0.95)
     p.circle(cx, cy, cr - 2.6, None, "#C8B89E", 0.5)
     for angle in range(0, 360, 30):
         a = math.radians(angle)
-        inner = cr - (4.4 if angle % 90 == 0 else 2.6)
+        inner = cr - (4.2 if angle % 90 == 0 else 2.5)
         p.line([(cx + inner * math.sin(a), cy - inner * math.cos(a)),
                 (cx + (cr - 0.8) * math.sin(a), cy - (cr - 0.8) * math.cos(a))], "#6B6156", 0.75)
-    p.poly([(cx - 3.8, cy), (cx, cy - 12.6), (cx + 3.8, cy)], "#B22222")
-    p.poly([(cx - 3.8, cy), (cx, cy + 12.6), (cx + 3.8, cy)], "#1F4A6E")
+    p.poly([(cx - 3.6, cy), (cx, cy - 12.2), (cx + 3.6, cy)], "#B22222")
+    p.poly([(cx - 3.6, cy), (cx, cy + 12.2), (cx + 3.6, cy)], "#1F4A6E")
     p.circle(cx, cy, 2.2, "#F0C66E", "#4A3E30", 0.5)
-    p.text(cx, cy - cr - 3.8, "N", 6.8, "#5A4634")
+    p.text(cx, cy - cr - 3.6, "N", 6.8, "#5A4634")
 
 
 def scene_peru_hero(p):
@@ -539,21 +554,41 @@ def scene_rahul(p):
     p.text(w * 0.85, 17.5, "136", 12.0, "#FFD23F")
 
 
-def scene_bahrain(p):
+def scene_trade(p):
+    """EU-Indonesia CEPA: container vessel crossing open waters + 98.5% tariff-cut plaque."""
     w, h, g = p.w, p.h, p.base
-    p.vgrad(0, h, "#292A41", "#CC7549")
-    smoke(p, w * .69, g * .80, 24, -33, 3, 9, 18, "#32313A", 185)
-    p.glow(w * .65, g * .78, 34, "#FFC87C", 190)
-    flames(p, w * .65, g * .90, 22, 24)
-    for x, top in ((21, 31), (29, 36), (158, 21)):
-        p.poly([(x, h), (x + 1, top), (x + 4, top), (x + 6, h)], "#323242")
-        p.line([(x + 1, top + 4), (x + 4, top + 4)], "#E2BE9E", 1)
-    roof = [(0, h), (0, g * .88)]
-    for x in range(0, int(w), 24):
-        roof.extend([(x + 18, g * .74), (x + 18, g * .88)])
-    p.poly(roof + [(w, g * .88), (w, h)], "#162839")
-    for x in range(8, int(w), 10):
-        p.rect(x, g - 5.2, x + 4, g - 2.4, "#EFC887")
+    sea = g * 0.58
+    p.vgrad(0, sea, "#9AC0DC", "#F5EFE3")
+    ridge(p, sea - 1.5, h * 0.06, 1.3, 0.9, "#B6C4CC", y_floor=sea + 2)
+    waves(p, sea, h, "#215B7E", "#123852", crest="#E3F2FA", n=4, seed=47)
+
+    # Stylized deep-water container vessel carrying EU-navy, gold, crimson & ivory containers.
+    sx, sy = w * 0.48, g - 8.5
+    p.line([(sx - 66, sy + 4.8), (sx - 44, sy + 4.8)], rgb("#E6F4FA", 170), 0.85)
+    p.poly([(sx - 44, sy - 2.0), (sx + 40, sy - 2.0), (sx + 48, sy - 7.0),
+            (sx + 38, sy + 5.2), (sx - 41, sy + 5.2)], "#1D3248", "#0F1D2C", 0.55)
+    p.rect(sx - 41, sy + 2.6, sx + 39, sy + 5.0, "#A9302A")
+    # Stern bridge tower.
+    p.rect(sx - 38, sy - 13.5, sx - 25, sy - 2.0, "#F8F4EC", "#394856", 0.5)
+    p.rect(sx - 35.5, sy - 10.8, sx - 27.5, sy - 8.6, "#1F4E8C")
+    p.rect(sx - 34, sy - 16.5, sx - 29.5, sy - 13.5, "#E0AF38")
+    # Stacked containers cleanly below the upper-left ribbon.
+    cols = (
+        ("#1F4E8C", "#C42B2B", "#E0AF38"),
+        ("#C42B2B", "#1F4E8C", "#F6F1E4"),
+        ("#E0AF38", "#2B6B4F", "#1F4E8C"),
+        ("#1F4E8C", "#C42B2B", "#F6F1E4"),
+        ("#C42B2B", "#E0AF38", "#1F4E8C"),
+    )
+    for ci, stack in enumerate(cols):
+        cx0 = sx - 21 + ci * 11.8
+        for ri, col in enumerate(stack):
+            cy1 = sy - 2.0 - ri * 4.4
+            p.rect(cx0, cy1 - 3.9, cx0 + 10.6, cy1, col, "#142230", 0.35)
+
+    # Dark-and-gold tariff-line cut plaque in the clear upper-right.
+    p.rect(w - 50, 4, w - 4, 24, "#11161D", "#F0C842", 0.9, r=1.5)
+    p.text(w - 27, 14.3, "98.5%", 10.4, "#FFD23F")
 
 
 def scene_flood(p):
@@ -609,8 +644,8 @@ def scene_football(p):
 
 
 SCENES = {
-    "cop": scene_cop31, "hormuz": scene_hormuz_hero, "andes": scene_peru_hero,
-    "bahrain": scene_bahrain, "baltic": scene_baltic, "caboverde": scene_caboverde,
+    "cop": scene_cop31, "gulf": scene_gulf_hero, "andes": scene_peru_hero,
+    "trade": scene_trade, "baltic": scene_baltic, "caboverde": scene_caboverde,
     "sinaloa": scene_sinaloa, "flood": scene_flood, "bandasea": scene_bandasea,
     "mercury": scene_bepicolombo, "football": scene_football, "vegas": scene_vegas_pole,
     "cricket": scene_rahul,

@@ -12,8 +12,9 @@ Thirty-seven strict Saturday-UTC dispatches across seven editorial regions (`EUR
 [SOURCES.tsv](SOURCES.tsv) is the edition ledger. Every row gives a card or wire number, the UTC date or documented minute inside `2026-11-21T00:00Z..23:59Z`, the printed credit, the direct source URL, and the exact fact it supports.
 
 - **Antalya (card 1, `CONFIRMED`):** Reuters (`23:39 UTC`) and the Guardian (`22:25 UTC`) reported a new presidency package announced on Day 13 overtime, not a final adopted pact. Objections were due at `03:00 UTC` Sunday with a plenary set for `06:00 UTC` Sunday.
-- **Strait of Hormuz (card 2, `OFFICIAL`):** UKMTO logged two Saturday-UTC projectile hits near Khasab, Oman — Warning `215-26` at `05:00 UTC` (11 nm north) and Warning `216-26` at `05:50 UTC` (17 nm east) — with no casualties reported and no attacker named.
+- **Gulf — Bahrain & Hormuz (card 2, `OFFICIAL`):** Bahrain's Interior Ministry reported a fire at an industrial facility blamed on an Iranian attack (`21:30 UTC`, no injuries), while the IRGC separately claimed strikes on US Patriot radar bases (rejected by Bahrain). Earlier, UKMTO logged two Saturday-UTC projectile hits near Khasab, Oman — Warning `215-26` at `05:00 UTC` (11 nm north) and Warning `216-26` at `05:50 UTC` (17 nm east) — with no casualties and no attacker named.
 - **Junín, Peru (card 3, `OFFICIAL`):** Peru's IGP recorded the M6.7 origin at `00:09 UTC` Saturday (`19:09` local Friday, 129 km deep). COEN–INDECI report 6 (`23:00 UTC` / `18:00` Peru) logged national totals of 1 dead, 16 injured, and 152 homes uninhabitable.
+- **Brussels (card 4, `OFFICIAL`):** The European Union and Indonesia signed their Comprehensive Economic Partnership Agreement (CEPA) and Investment Protection Agreement on Saturday 21 November in Brussels, eliminating or cutting 98.5% of EU tariff lines after a decade of negotiations.
 - **Gulf of Finland (card 5, `CONFIRMED`):** The Finnish Border Guard was alerted around `06:50 UTC` (`08:50 EET`) Saturday after drones struck the Russian cargo ship *Sparta II*; all 16 crew members evacuated as Finnish authorities suspected Ukrainian drones.
 - **Praia, Cabo Verde (card 6, `OFFICIAL`):** On Saturday 21 November, the National Electoral Commission (CNE) officially proclaimed incumbent President José Maria Neves re-elected with 63.96% (82,621 valid votes) from the 15 November ballot.
 - **Guasave, Mexico (card 7, `CONFIRMED`):** Mexican federal authorities confirmed the capture of cartel leader Fausto Isidro Meza Flores ('El Chapo Isidro') on Saturday following overnight clashes and Saturday extraction to Mexico City; four soldiers and seven gunmen were killed.
@@ -37,7 +38,7 @@ The box at the foot of the page prints two ledgers:
 | Cyclone Akvan landfall | Fri 20 Nov | [The Hindu](https://www.thehindu.com/news/national/cyclone-akvan-odisha-andhra-pradesh-landfall-imd-updates/article71722866.ece), [IMD](https://mausam.imd.gov.in/backend/assets/cyclone_pdf/11_Hourly_Bulletin_201126_0930IST.pdf) |
 | Voyager 1 light-day | Wed 18 Nov | [NASA](https://www.nasa.gov/news-release/nasas-voyager-1-makes-history-reaching-one-light-day-from-earth/) |
 
-**Pending at 23:59 UTC close** lists outcomes the page does not assert: BepiColombo orbit capture (card 10), final COP31 pact adoption (card 1), the Las Vegas GP race (`Sun 22 Nov, 04:00 UTC`, card 12 is qualifying), and the Boca–Mineiro final whistle (wire 37).
+**Not yet at 23:59 UTC close** lists outcomes the page does not assert: BepiColombo orbit capture (card 10), final COP31 pact adoption (card 1), the Las Vegas GP race (`Sun 22 Nov, 04:00 UTC`, card 12 is qualifying), and the Boca–Mineiro final whistle (wire 37).
 
 ## Reproduce
 

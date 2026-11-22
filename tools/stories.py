@@ -24,7 +24,7 @@ REGIONS = [
 TAGS = ("CONFIRMED", "OFFICIAL", "REPORTED", "CLAIM", "UNCONFIRMED")
 
 DECK = (
-    "A new draft in Antalya  ·  Two tankers struck in Hormuz  ·  "
+    "A new draft in Antalya  ·  Bahrain site hit & two Hormuz tankers struck  ·  "
     "Peru counts an Andean quake  ·  Waiting on BepiColombo"
 )
 
@@ -44,20 +44,20 @@ STORIES = [
          "Fossil fuels and adaptation funding split delegates. The presidency announced "
          "a new text, with objections due by 03:00 UTC Sunday.",
          sub="Day 13 · no final pact", chip="23:39 UTC  /  Reuters dispatch"),
-    card("MIDEAST", "OFFICIAL", "KHASAB, OMAN", 26.18, 56.25, "hormuz", "Shipping",
-         "HORMUZ: TANKERS HIT", "Two tanker strikes reported in Strait of Hormuz",
-         "UKMTO logged projectile hits on vessels 11 nm north and 17 nm east "
-         "of Khasab. No casualties were reported and no attacker was named.",
-         sub="05:00 & 05:50 UTC", chip="UKMTO warnings 215-26, 216-26"),
+    card("MIDEAST", "OFFICIAL", "BAHRAIN & OMAN", 26.20, 53.40, "gulf", "Gulf",
+         "GULF: BAHRAIN & HORMUZ", "Bahrain industrial site hit; two tankers struck off Oman",
+         "Bahrain blames Iran for a plant fire (no injuries); IRGC claims US radar hits. "
+         "UKMTO logs two vessels hit off Khasab, no casualties.",
+         sub="UKMTO 05:00Z · Bahrain 21:30Z", chip="UKMTO 215-26, 216-26  /  Bahrain Interior Min."),
     card("AMERICAS", "OFFICIAL", "JUNÍN, PERU", -10.97, -76.19, "andes", "Earthquake",
          "PERU: QUAKE 6.7", "Peru quake leaves 152 homes uninhabitable",
          "Civil defence records one death and 16 injuries nationwide. The M6.7 quake hit "
          "at 00:09 UTC Saturday, still Friday evening in Peru.",
          sub="129 km deep · Peru’s IGP", chip="23:00 UTC  /  INDECI report 6"),
-    card("MIDEAST", "OFFICIAL", "MANAMA, BAHRAIN", 26.23, 50.58, "bahrain", "Gulf",
-         "BAHRAIN: FIRE", "Bahrain reports fire at industrial site",
-         "Ministry blames an Iranian attack; no injuries reported.",
-         chip="21:30 UTC  /  Interior Min."),
+    card("EUROPE", "OFFICIAL", "BRUSSELS, BELGIUM", 50.85, 4.35, "trade", "Trade",
+         "EU–INDONESIA: TRADE", "EU and Indonesia sign landmark trade pact",
+         "Cuts 98.5% of EU tariff lines after a decade of talks.",
+         chip="CEPA signed  /  Brussels"),
     card("EUROPE", "CONFIRMED", "GULF OF FINLAND", 60.0, 26.2, "baltic", "Baltic",
          "BALTIC: SHIP ABLAZE", "Drone strike sets Russian cargo ship ablaze",
          "Crew of 16 leaves the Sparta II; Finland suspects Ukraine.",
@@ -71,9 +71,9 @@ STORIES = [
          "Four soldiers and seven gunmen died in the raid.",
          chip="Saturday confirmation"),
     card("ASIA", "OFFICIAL", "BHUBANESWAR, INDIA", 20.30, 85.82, "flood", "Weather",
-         "AKVAN: AFTERMATH", "Odisha puts rivers on watch after Akvan",
+         "CYCLONE AKVAN", "Odisha puts rivers on flood watch after Cyclone Akvan",
          "Round-the-clock checks on rivers and reservoirs.",
-         chip="08:06 UTC  /  Sat order"),
+         chip="08:06 UTC  /  Sat flood watch"),
     card("ASIA", "OFFICIAL", "BANDA SEA", -7.73, 127.54, "bandasea", "Earthquake",
          "BANDA SEA: QUAKE 6.8", "Deep quake off Timor-Leste rattles Darwin",
          "Struck 132 km deep, north-east of Lospalos.",
@@ -100,7 +100,7 @@ STORIES = [
     wire("MIDEAST", "Basra", "Power-plant gas blast kills four", tag="REPORTED"),
     wire("EUROPE", "Kyiv", "Zelensky defends Crimean Bridge strikes"),
     wire("EUROPE", "Paris", "21,500 join cost-of-living march"),
-    wire("EUROPE", "Brussels", "EU and Indonesia sign trade pact"),
+    wire("MIDEAST", "Tehran", "Enriched uranium stays in Iran, FM says"),
     wire("AFRICA", "Abuja", "CAF posts a $31.2m net profit"),
     wire("AFRICA", "Pretoria", "State funeral set for Mlambo-Ngcuka"),
     wire("AFRICA", "Johannesburg", "Marchers lie down over femicide"),
@@ -144,8 +144,8 @@ TIMELINE = [
 KPIS = [
     dict(story=1, figure="Day 13", caption=("COP31 overtime;", "no final pact adopted"),
          needs=("Day 13", "no final pact")),
-    dict(story=2, figure="2 tankers", caption=("struck off Khasab,", "per UKMTO warnings"),
-         needs=("Two tanker strikes", "Khasab")),
+    dict(story=2, figure="2 tankers", caption=("struck off Khasab;", "Bahrain plant ablaze"),
+         needs=("two tankers", "Khasab", "Bahrain")),
     dict(story=3, figure="152", caption=("homes uninhabitable,", "Peru 23:00 UTC toll"),
          needs=("152 homes uninhabitable",)),
     dict(story=5, figure="16 crew", caption=("leave burning Sparta II", "in Gulf of Finland"),
@@ -172,7 +172,7 @@ EXCLUDED = [
     ("Cyclone Akvan landfall", date(2026, 11, 20)),
     ("Voyager 1 light-day (18 Nov)", date(2026, 11, 18)),
 ]
-PENDING_LABEL = ("PENDING", f"at {CLOCK} close")
+PENDING_LABEL = ("NOT YET", f"at {CLOCK} close")
 PENDING = [
     ("BepiColombo orbit capture (21:37 UTC expected signal unverified at press time)", None),
     ("Final COP31 pact", None),

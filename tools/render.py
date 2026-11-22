@@ -404,7 +404,9 @@ def card(b, st, x, y, w, art_h, lead):
         art_subpill(b, x + 5, y + 34.5, st["sub"], 10.2, 17.5, st["id"])
         art_caption(b, x, y + art_h, w, st["chip"], 11.5, bar_h, 8.0, st["id"])
     else:
-        rib_max = (w - 62) if st["scene"] == "caboverde" else ((w - 46) if st["scene"] == "bandasea" else (w - 8))
+        rib_max = {
+            "caboverde": w - 62, "trade": w - 58, "bandasea": w - 46,
+        }.get(st["scene"], w - 8)
         art_ribbon(b, x + 4, y + 4, st["banner"], 13.2, 20.5, rib_max, st["id"])
         art_caption(b, x, y + art_h, w, st["chip"], 11.0, bar_h, 7.0, st["id"])
 
@@ -478,8 +480,8 @@ def world_map(b, x, y, w, h):
         best = None
         # In dense clusters, offset the numbered badge while keeping the leader dot on the true coordinate.
         bearing = {
-            "cop": -45, "hormuz": 20, "bahrain": -135, "baltic": -40,
-            "mercury": -90, "football": -155, "caboverde": -135,
+            "cop": -45, "gulf": 25, "trade": 165, "baltic": -40,
+            "mercury": -80, "football": -135, "caboverde": -135,
             "sinaloa": 120, "bandasea": -30,
         }.get(st["scene"], -90)
         for ring in range(4):
