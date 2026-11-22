@@ -1,9 +1,9 @@
-"""Render the Saturday 21 November 2026 Broadsheet Atlas (v5 — 40 verified stories).
+"""Render the full 24-hour Saturday Broadsheet Atlas.
 
     python3 tools/render.py [--out entry.png] [--report /tmp/report.json] [--thumb /tmp/thumb.png]
 
 Draws at 2x (2048 px) and downsamples via LANCZOS to 1024 x 1024, then writes
-a deterministic progressive 4:4:4 JPEG stored as entry.png (matching main.ts).
+a lossless, deterministic PNG (matching main.ts).
 Strict layout assertions run on every build: zero text overlaps, zero margin
 overflows, zero map pin collisions, and >= 8 px right-margin slack on every brief.
 """
@@ -50,6 +50,7 @@ TAG_STYLE = {
     "OFFICIAL":  ("#1F4A6E", "#E8F0F7"),
     "REPORTED":  ("#9A5B0A", "#FDF3E3"),
     "CLAIM":     ("#6A3F7A", "#F4ECF8"),
+    "UNCONFIRMED": ("#96382E", "#F9EBE6"),
 }
 
 FD = "/usr/share/fonts/truetype"
@@ -88,6 +89,7 @@ class Board:
         self.d = ImageDraw.Draw(self.img, "RGBA")
         self.texts = []  # (x0, y0, x1, y1, label)
         self.pins = []
+        self.anchors = []
         self.fits = []   # (label, right edge, container right, required margin, actual slack)
 
     def rect(self, x0, y0, x1, y1, fill=None, outline=None, width=1.0, r=0):
@@ -196,13 +198,14 @@ def draw_wrapped(board, x, y, lines, lh, label, maxw):
 def masthead(b):
     counts = S.region_counts()
 
-    # Signature Midnight Slate-Indigo prestige folio bar (20:30 UTC edition clock)
     b.rect(M, 8, W - M, 25, fill=FOLIO_BG)
-    bl = b.text(M + 8, 16.7, "GLOBAL DISPATCH · 21 NOV · 20:30 UTC", "sans_k", 8.6, FOLIO_GOLD,
+    bl = b.text(M + 8, 16.7, "GLOBAL DISPATCH  /  FULL 24-HOUR EDITION", "sans_k", 9.0, FOLIO_GOLD,
                 anchor="lm", spacing=1.0, label="kicker")
-    stats = (f"{len(S.STORIES)} VERIFIED STORIES · {len(counts)} REGIONS · "
-             f"EVERY ONE DATED {S.DAY_LABEL.upper()}")
-    br = b.text(W - M - 8, 16.7, stats, "sans_b", 8.5, "#F5F1E8", anchor="rm", label="stats")
+    clock_x = W - M - 86
+    b.rect(clock_x, 8, W - M, 25, fill=FOLIO_GOLD)
+    b.text(clock_x + 43, 16.7, S.CLOCK, "sans_k", 11.0, FOLIO_BG, anchor="mm", label="press-clock")
+    stats = f"{len(S.STORIES)} STORIES   /   {len(counts)} REGIONS      ·      SATURDAY CLOSE"
+    br = b.text(clock_x - 8, 16.7, stats, "sans_k", 9.0, "#F5F1E8", anchor="rm", label="stats")
     if bl[2] + 12 > br[0]:
         raise SystemExit(f"LAYOUT: masthead folio bar collides ({bl[2]:.1f} vs {br[0]:.1f})")
 
@@ -234,6 +237,9 @@ def kpi_row(b, y0=115, y1=157):
         bf = b.text(x + 7.5, y0 + 4.8, k["figure"], "serif_b", 20.0, INK, anchor="lt",
                     label=f"kpi{i}")
         b.fit(f"kpi{i}", bf[2], x + tw, 4)
+        ix = b.text(x + tw - 5, y0 + 7, f"#{k['story']:02d}", "sans_b", 7.9, MUTED,
+                    anchor="rt", label=f"kpi-ref{i}")
+        b.fit(f"kpi-ref{i}", bf[2], ix[0], 4)
         for j, cap in enumerate(k["caption"]):
             bx = b.text(x + 7.5, y0 + 24.6 + j * 9.3, cap, "sans", 8.8, BODY_INK, anchor="lt",
                         label=f"kpi{i}c{j}")
@@ -243,7 +249,7 @@ def kpi_row(b, y0=115, y1=157):
 def region_bar(b, y0=161, y1=175):
     counts = S.region_counts()
     total = sum(counts.values())
-    assert total == len(S.STORIES) == 40
+    assert total == len(S.STORIES)
 
     floor_w = 82.0
     keys = [k for k, _, _ in S.REGIONS]
@@ -280,9 +286,9 @@ def art_ribbon(b, x, y, text, size, h, max_w, sid):
     while sz > 10.5 and (b.measure(text, "sans_k", sz) + 2 * pad_x) > max_w:
         sz -= 0.25
     tw = b.measure(text, "sans_k", sz) + 2 * pad_x
-    # Crisp drop shadow + high-contrast deep broadcast crimson ribbon with 1.25px white frame
     b.rect(x + 1.5, y + 1.8, x + tw + 1.5, y + h + 1.8, fill=(0, 0, 0, 115))
-    b.rect(x, y, x + tw, y + h, fill=VERMILION, outline="#FFFFFF", width=1.25)
+    b.rect(x, y, x + tw, y + h, fill=VERMILION if sid <= 3 else FOLIO_BG,
+           outline="#FFFFFF", width=1.1)
     b.text(x + tw / 2, y + h / 2 + 0.4, text, "sans_k", sz, "#FFFFFF", anchor="mm",
            label=f"banner:{sid}")
     return tw
@@ -335,7 +341,7 @@ def meta_line(b, x, y, w, st, size, badge_r, lead):
 
 
 def card(b, st, x, y, w, art_h, lead):
-    im = art.draw_scene(st["id"], w, art_h, out_scale=K)
+    im = art.draw_scene(st["scene"], w, art_h, out_scale=K)
     b.img.paste(im, (round(x * K), round(y * K)))
     b.rect(x, y, x + w, y + art_h, outline="#BEB4A0", width=0.65)
 
@@ -375,7 +381,7 @@ def card(b, st, x, y, w, art_h, lead):
 
 
 def world_map(b, x, y, w, h):
-    b.text(x, y, "WORLD ATLAS · STORIES BY LOCATION", "sans_k", 9.1, INK, anchor="lt",
+    b.text(x, y, "WORLD ATLAS  /  THE ILLUSTRATED DISPATCHES", "sans_k", 9.1, INK, anchor="lt",
            spacing=0.4, label="map-title")
     my = y + 15.0
     box = (x, my, w, h)
@@ -390,10 +396,11 @@ def world_map(b, x, y, w, h):
 
     layer = Image.new("RGBA", b.img.size, (0, 0, 0, 0))
     ld = ImageDraw.Draw(layer)
-    for pts in worldmap.LAND.values():
+    land, lakes = worldmap.outlines()
+    for pts in land:
         ld.polygon([tuple(v * K for v in worldmap.project(lo, la, box)) for lo, la in pts],
                    fill=MAP_LAND, outline=MAP_COAST)
-    for pts in worldmap.WATER.values():
+    for pts in lakes:
         ld.polygon([tuple(v * K for v in worldmap.project(lo, la, box)) for lo, la in pts],
                    fill=MAP_WATER, outline=MAP_COAST)
     mask = Image.new("L", b.img.size, 0)
@@ -404,19 +411,9 @@ def world_map(b, x, y, w, h):
     b.d = ImageDraw.Draw(b.img, "RGBA")
     b.rect(x, my, x + w, my + h, outline="#102535", width=0.8)
 
-    # Briefs 14-40 as crisp white-ringed regional dots underneath pins
-    for st in S.STORIES[13:]:
-        if st.get("lat") is None or st.get("lon") is None:
-            continue
-        dx, dy = worldmap.project(st["lon"], st["lat"], box)
-        if not (x + 3 <= dx <= x + w - 3 and my + 3 <= dy <= my + h - 3):
-            raise SystemExit(f"LAYOUT: brief dot {st['id']} outside map box ({dx:.1f}, {dy:.1f})")
-        b.circle(dx, dy, 2.6, region_color(st["region"]), "#FFFFFF", 0.6)
-
-    # Collision-free numbered pins for geographic leads (skip non-geographic #11 Global Markets)
-    geo_leads = [st for st in S.STORIES[:13] if st.get("lat") is not None and st.get("lon") is not None]
-    R = 6.5
-    gap = 2 * R + 1.8
+    geo_leads = S.STORIES[:S.LEADS]
+    R = 7.2
+    gap = 2 * R + 2.3
     placed = []
     truths = []
     for st in geo_leads:
@@ -426,14 +423,20 @@ def world_map(b, x, y, w, h):
     for idx, st in enumerate(geo_leads):
         tx, ty = truths[idx]
         best = None
-        for ring in range(0, 10):
-            rr = ring * 7.8
+        # In dense clusters, move the number, never the geographic anchor.
+        bearing = {"mercury": -75, "geneva": 140, "football": -142,
+                   "bahrain": 110, "tanker": -25, "sinaloa": 70}.get(st["scene"], -90)
+        for ring in range(4):
+            rr = ring * 14
             for k in range(16 if ring else 1):
-                a = math.radians(-90 + k * 22.5 + (ring % 2) * 11.25)
+                a = math.radians(bearing + (-1 if k % 2 else 1) * ((k + 1) // 2) * 22.5)
                 cx, cy = tx + math.cos(a) * rr, ty + math.sin(a) * rr
                 if not (x + R + 1.5 <= cx <= x + w - R - 1.5 and my + R + 1.5 <= cy <= my + h - R - 1.5):
                     continue
                 if any(math.hypot(cx - px, cy - py) < gap for px, py, _ in placed):
+                    continue
+                if any(j != idx and math.hypot(cx - px, cy - py) < R + 2.5
+                       for j, (px, py) in enumerate(truths)):
                     continue
                 best = (cx, cy)
                 break
@@ -450,18 +453,22 @@ def world_map(b, x, y, w, h):
                 raise SystemExit(f"LAYOUT: pins {placed[i][2]['id']} and {placed[j][2]['id']} collide")
 
     for (cx, cy, st), (tx, ty) in zip(placed, truths):
+        b.anchors.append(dict(id=st["id"], place=st["place"], lat=st["lat"], lon=st["lon"],
+                              x=round(tx, 2), y=round(ty, 2)))
         if math.hypot(cx - tx, cy - ty) > 0.5:
-            b.d.line([(tx * K, ty * K), (cx * K, cy * K)], fill=(255, 255, 255, 200),
-                     width=max(1, round(0.9 * K)))
-            b.circle(tx, ty, 1.8, "#FFFFFF", MAP_OCEAN, 0.5)
+            line = [(tx * K, ty * K), (cx * K, cy * K)]
+            b.d.line(line, fill="#FBF7EE", width=round(2.5 * K))
+            b.d.line(line, fill=FOLIO_BG, width=K)
+            b.circle(tx, ty, 2.0, FOLIO_BG, "#FFFFFF", 0.7)
     for cx, cy, st in placed:
         b.circle(cx, cy, R, region_color(st["region"]), "#FFFFFF", 1.0)
-        b.text(cx, cy + 0.3, str(st["id"]), "sans_k", 7.4, "#FFFFFF", anchor="mm", record=False)
+        b.text(cx, cy + 0.3, str(st["id"]), "sans_k", 8.5, "#FFFFFF", anchor="mm", label=f"pin{st['id']}")
         b.pins.append((round(cx, 2), round(cy, 2), R, st["id"]))
+    assert [pin[3] for pin in b.pins] == [s["id"] for s in S.STORIES if "headline" in s]
 
     # Caption + balanced 2-row 7-region legend (4 + 3)
     cap_y = my + h + 10.0
-    b.text(x, cap_y, "12 mapped lead pins (#11 global market) · Dots: briefs (shared city pins)", "sans_b", 7.1,
+    b.text(x, cap_y, "1–13 match the cards. Leader dots mark datelines or event sites.", "sans_b", 8.5,
            "#3C4654", anchor="lm", label="map-cap")
     ky = cap_y + 13.0
     for row_items in (S.REGIONS[:4], S.REGIONS[4:]):
@@ -476,14 +483,15 @@ def world_map(b, x, y, w, h):
 
 
 def briefs(b, x, y, w):
-    b.text(x, y, "ALSO ON SATURDAY 21 NOVEMBER 2026 — 27 MORE STORIES", "sans_k", 9.1, INK,
+    items = S.STORIES[S.LEADS:]
+    b.text(x, y, f"THE SATURDAY WIRE  /  {len(items)} MORE DISPATCHES", "sans_k", 9.1, INK,
            anchor="lt", spacing=0.4, label="briefs-title")
-    rows = 14
+    b.text(x + w, y, f"FILED THROUGH {S.CLOCK}", "sans_b", 8.2, MUTED,
+           anchor="rt", label="wire-clock")
+    rows = (len(items) + 1) // 2
     col_gap = 14.0
     colw = (w - col_gap) / 2
     lh = 15.5
-    items = S.STORIES[13:]
-    assert len(items) == 27
     for i, st in enumerate(items):
         c, r = divmod(i, rows)
         cx = x + c * (colw + col_gap)
@@ -498,18 +506,26 @@ def briefs(b, x, y, w):
             ("  " + st["sources"], "nar_i", 10.4, MUTED),
         ]
         _, right = b.runs(cx + 15.2, cy + 0.2, runs, f"brief{st['id']}", anchor_v="m")
-        b.fit(f"brief{st['id']}", right, cx + colw, 8.0)
+        limit = cx + colw
+        if st["tag"]:
+            limit = tag_pill(b, limit - 2, cy, st["tag"], 7.1, 11.0, st["id"])
+        b.fit(f"brief{st['id']}", right, limit, 8.0)
         if r < rows - 1:
             b.hline(cx + 15.2, cx + colw, cy + lh / 2, "#E8E1D3", 0.5)
 
-    # Balanced archival colophon in slot 14 of right column (aligns both columns evenly!)
+    # The odd wire count leaves one slot for the match desk's other full-time scores.
     note_x = x + (colw + col_gap)
-    note_y = y + 22.0 + 13 * lh
+    note_y = y + 22.0 + (rows - 1) * lh
     b.rect(note_x, note_y - 6.2, note_x + colw, note_y + 6.2, fill=TILE_BG, outline=TILE_BORDER,
            width=0.6, r=2.0)
-    b.text(note_x + colw / 2, note_y + 0.2,
-           "40 stories · 7 regions · Saturday 21 Nov 2026 (20:30 UTC edition)",
-           "nar_i", 9.6, "#3C4654", anchor="mm", label="briefs-note")
+    slug = "ENGLAND / FT"
+    label_w = b.measure(slug, "sans_k", 8.2) + 10
+    b.rect(note_x, note_y - 6.2, note_x + label_w, note_y + 6.2, fill=FOLIO_BG, r=2.0)
+    b.text(note_x + label_w / 2, note_y + .2, slug, "sans_k", 8.2, FOLIO_GOLD,
+           anchor="mm", label="ft-title")
+    ft_runs = [("  ·  ".join(S.FOOTBALL_FT), "nar_b", 10.2, INK), ("   Premier League", "nar_i", 9.0, MUTED)]
+    _, right = b.runs(note_x + label_w + 5, note_y + .2, ft_runs, "ft-scores", anchor_v="m")
+    b.fit("ft-scores", right, note_x + colw, 4.0)
 
     end_y = y + 22.0 + (rows - 1) * lh + 7.5
     b.vline(x + colw + col_gap / 2, y + 15, end_y, RULE, 0.7)
@@ -534,10 +550,12 @@ def date_check(b, y0, y1):
            label="dc-pill")
     x = M + pw + 15
     maxw = W - M - 8 - x
-    t1 = [("Excluded (Fri 20 Nov & earlier):", "nar_b", 9.8, VERMILION)] + \
-        [(w, "nar", 9.8, INK) for w in " · ".join(S.EXCLUDED_FRIDAY).split(" ")]
-    t2 = [("Not confirmed when drawn:", "nar_b", 9.8, VERMILION)] + \
-        [(w, "nar", 9.8, INK) for w in " · ".join(S.NOT_YET).split(" ")]
+    t1 = [(f"At {S.CLOCK}:", "sans_k", 9.4, VERMILION),
+          ("21:37 UTC was an expected signal time. We could not verify ESA confirmation of Mercury capture. "
+           "COP31’s new package still awaited adoption.", "sans", 9.4, INK)]
+    t2 = [("Either side of midnight:", "sans_k", 9.4, VERMILION),
+          ("Jazan’s two missile interceptions were Friday. Boca’s 2–0 was still live. "
+           "The Vegas race was scheduled for Sunday at 04:00 UTC.", "sans", 9.4, INK)]
     l1 = rich_wrap(b, _split_lead(t1), maxw)
     l2 = rich_wrap(b, _split_lead(t2), maxw)
     lines = l1 + l2
@@ -555,10 +573,11 @@ def verification_bar(b, y0, y1):
     cy = (y0 + y1) / 2 + 0.2
     items = [
         ("HOW WE CHECKED:", None, ""),
-        ("CONFIRMED", "CONFIRMED", "= 2+ independent outlets"),
-        ("OFFICIAL", "OFFICIAL", "= on-the-record statement"),
-        ("REPORTED", "REPORTED", "= single outlet or NGO"),
-        ("CLAIM", "CLAIM", "= one party's unverified account"),
+        ("CONFIRMED", "CONFIRMED", "independent accounts agree"),
+        ("OFFICIAL", "OFFICIAL", "named authority on record"),
+        ("REPORTED", "REPORTED", "attributed to one source"),
+        ("CLAIM", "CLAIM", "unverified party account"),
+        ("UNCONFIRMED", "UNCONFIRMED", "outcome not verified"),
     ]
     total_w = b.measure(items[0][0], "sans_k", 7.8) + 8.0
     for idx, (tag, key, desc) in enumerate(items[1:]):
@@ -583,9 +602,8 @@ def verification_bar(b, y0, y1):
 
 
 def footer(b, y):
-    left = ("Every story happened, updated, or was widely reported on Saturday 21 November 2026 · "
-            "Sources named beside every item.")
-    right = "Original editorial drawings & cartography"
+    left = f"Saturday events and dated updates, 00:00–{S.CLOCK}. Scores are full time only where stated."
+    right = "Dispatch Atlas   /   Drawings by the desk · Natural Earth coastlines"
     bl = b.text(M, y, left, "sans_i", 8.2, "#35404E", anchor="lm", label="footer-l")
     br = b.text(W - M, y, right, "sans_b", 8.2, "#35404E", anchor="rm", label="footer-r")
     if bl[2] + 12 > br[0]:
@@ -620,7 +638,7 @@ def build():
     b.hline(M, W - M, y, RULE, 0.85)
     y += 6.0
 
-    # Secondary cards 4-13 (2 rows x 5, 70px silkscreen art + giant upper-left vermilion ribbon)
+    # Secondary cards 4-13 (two rows of five, with slate ribbons).
     sw, sgap = 188, (CW - 5 * 188) / 4
     for row in range(2):
         ends = []
@@ -659,7 +677,7 @@ def build():
     brief_slacks = [f[4] for f in b.fits if f[0].startswith("brief")]
     report = dict(
         texts=b.texts,
-        pins=b.pins,
+        pins=b.pins, anchors=b.anchors,
         fits=b.fits,
         masthead_px=tsize,
         bottom_top=round(bottom_top, 2),
@@ -677,33 +695,26 @@ def build():
     return out, report
 
 
-def save_jpeg(img, path, quality=91):
-    img.save(path, "JPEG", quality=quality, subsampling=0, progressive=True, optimize=True)
-    return os.path.getsize(path)
-
-
 def main():
     ap = argparse.ArgumentParser()
     root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     ap.add_argument("--out", default=os.path.join(root, "entry.png"))
     ap.add_argument("--report")
     ap.add_argument("--thumb")
-    ap.add_argument("--quality", type=int, default=91)
     a = ap.parse_args()
     img, report = build()
-    q = a.quality
-    size = save_jpeg(img, a.out, q)
-    while size > 450 * 1024 and q > 82:
-        q -= 1
-        size = save_jpeg(img, a.out, q)
+    img.save(a.out, "PNG", optimize=True)
+    size = os.path.getsize(a.out)
+    if size > 1024 * 1024:
+        raise SystemExit(f"PNG exceeds 1 MiB: {size} bytes")
     if a.thumb:
         img.resize((300, 300), Image.LANCZOS).save(a.thumb, "PNG")
-    report.update(quality=q, size=size)
+    report.update(format="PNG", size=size)
     if a.report:
         with open(a.report, "w") as fh:
             json.dump(report, fh, indent=2)
     print(
-        f"wrote {a.out}: {size} bytes ({size / 1024:.1f} KB), JPEG q{q}, "
+        f"wrote {a.out}: {size} bytes ({size / 1024:.1f} KiB), RGB PNG, "
         f"masthead={report['masthead_px']}px, min_brief_slack={report['min_brief_slack']}px, "
         f"bottom_top={report['bottom_top']}, dc={report['date_check_y0']}..{report['date_check_y1']}, "
         f"vk={report['vk_y0']}..{report['vk_y1']}, footer={report['footer_y']}, "
