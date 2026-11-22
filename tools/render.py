@@ -29,9 +29,9 @@ M = 16
 CW = W - 2 * M  # 992
 
 # Vertical budget. Caption bars sit inside the art height.
-LEAD_ART, LEAD_BAR = 102.0, 17.5
-SEC_ART, SEC_BAR = 67.0, 16.0
-SEC_BODY = 9.5
+LEAD_ART, LEAD_BAR = 104.0, 17.5
+SEC_ART, SEC_BAR = 66.0, 16.0
+SEC_BODY = 10.2
 WIRE_LH = 16.0
 
 # Signature Archival Broadsheet Palette
@@ -414,7 +414,7 @@ def card(b, st, x, y, w, art_h, lead):
     meta_line(b, x, my, w, st, 9.0 if lead else 8.7, 7.0 if lead else 6.2, lead)
 
     hy = my + (8.0 if lead else 6.8)
-    hsize, hlh = (17.8, 19.2) if lead else (12.5, 13.7)
+    hsize, hlh = (18.6, 20.0) if lead else (13.3, 14.5)
     hl = rich_wrap(b, tokens(st["headline"], "serif_b", hsize, INK), w)
     if len(hl) > 2:
         raise SystemExit(f"LAYOUT: headline {st['id']} needs {len(hl)} lines (max 2)")
@@ -422,13 +422,13 @@ def card(b, st, x, y, w, art_h, lead):
         _, right = b.runs(x, hy + hsize * 0.94 + i * hlh, ln, f"h{st['id']}:{i}")
         b.fit(f"h{st['id']}:{i}", right, x + w)
 
-    sy = hy + hsize * 0.94 + (len(hl) - 1) * hlh + (13.6 if lead else 11.8)
-    ssize, slh = (10.2, 11.8) if lead else (SEC_BODY, SEC_BODY + 1.8)
+    sy = hy + hsize * 0.94 + (len(hl) - 1) * hlh + (14.4 if lead else 12.2)
+    ssize, slh = (11.4, 13.0) if lead else (SEC_BODY, SEC_BODY + 1.8)
     toks = tokens(st["summary"], "sans", ssize, BODY_INK)
     src = f"({st['sources']})".split()
     toks += [(t, "sans_i", ssize, MUTED) for t in src]
     sl = rich_wrap(b, toks, w)
-    limit = 3 if lead else 2
+    limit = 2
     if len(sl) > limit:
         raise SystemExit(f"LAYOUT: summary {st['id']} needs {len(sl)} lines (max {limit})")
     end = draw_wrapped(b, x, sy, sl, slh, f"s{st['id']}", w)

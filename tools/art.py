@@ -550,8 +550,8 @@ def scene_rahul(p):
     p.arc(w * 0.63, turf + 4.5, 3.4, 110, 250, "#FFFFFF", 0.65)
 
     # Dark-and-gold scoreboard in the clear upper right.
-    p.rect(w * 0.72, 5, w - 5, 29, "#11161D", "#F0C842", 0.9, r=1.5)
-    p.text(w * 0.85, 17.5, "136", 12.0, "#FFD23F")
+    p.rect(w * 0.69, 4, w - 4, 26, "#11161D", "#F0C842", 0.9, r=1.5)
+    p.text(w * 0.835, 15.2, "DAY 3", 10.6, "#FFD23F")
 
 
 def scene_trade(p):
